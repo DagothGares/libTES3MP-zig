@@ -7,3 +7,4 @@ pub const map_tiles = @import("map_tiles.zig");
 pub const client_globals = @import("client_globals.zig");
 pub const time = @import("time.zig");
 pub const destinations = @import("destinations.zig");
+pub const weather = @import("weather.zig");

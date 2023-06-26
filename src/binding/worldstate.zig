@@ -27,21 +27,37 @@ pub const VariableType = enum(u3) {
 
 const VariableTypeError = error{MustBeInteger};
 
-pub const readReceivedWorldState = impl_ReadReceivedWorldstate;
+pub fn readReceivedWorldState() void {
+    return impl_ReadReceivedWorldstate();
+}
 
 /// Callers are expected to first call readReceivedWorldstate(), if necessary.
-pub const copyReceivedWorldStateToStore = impl_CopyReceivedWorldstateToStore;
+pub fn copyReceivedWorldStateToStore() void {
+    return impl_CopyReceivedWorldstateToStore();
+}
 
-pub const clearKillChanges = impl_ClearKillChanges;
-pub const clearMapChanges = impl_ClearMapChanges;
-pub const clearClientGlobals = impl_ClearClientGlobals;
+pub fn clearKillChanges() void {
+    return impl_ClearKillChanges();
+}
+pub fn clearMapChanges() void {
+    return impl_ClearMapChanges();
+}
+pub fn clearClientGlobals() void {
+    return impl_ClearClientGlobals();
+}
 
 /// Callers are expected to first call readReceivedWorldstate(), if necessary.
-pub const getKillChangesSize = impl_GetKillChangesSize;
+pub fn getKillChangesSize() c_uint {
+    return impl_GetKillChangesSize();
+}
 /// Callers are expected to first call readReceivedWorldstate(), if necessary.
-pub const getMapChangesSize = impl_GetMapChangesSize;
+pub fn getMapChangesSize() c_uint {
+    return impl_GetMapChangesSize();
+}
 /// Callers are expected to first call readReceivedWorldstate(), if necessary.
-pub const getClientGlobalsSize = impl_GetClientGlobalsSize;
+pub fn getClientGlobalsSize() c_uint {
+    return impl_GetClientGlobalsSize();
+}
 
 /// Callers are expected to first call readReceivedWorldstate(), if necessary.
 ///
@@ -215,11 +231,21 @@ pub fn addDestinationOverride(old_cell: [:0]const u8, new_cell: [:0]const u8) vo
     return impl_AddDestinationOverride(old_cell, new_cell);
 }
 
-pub const clearSynchronizedClientScriptIds = impl_ClearSynchronizedClientScriptIds;
-pub const clearSynchronizedClientGlobalIds = impl_ClearSynchronizedClientGlobalIds;
-pub const clearEnforcedCollisionRefIds = impl_ClearEnforcedCollisionRefIds;
-pub const clearCellsToReset = impl_ClearCellsToReset;
-pub const clearDestinationOverrides = impl_ClearDestinationOverrides;
+pub fn clearSynchronizedClientScriptIds() void {
+    return impl_ClearSynchronizedClientScriptIds();
+}
+pub fn clearSynchronizedClientGlobalIds() void {
+    return impl_ClearSynchronizedClientGlobalIds();
+}
+pub fn clearEnforcedCollisionRefIds() void {
+    return impl_ClearEnforcedCollisionRefIds();
+}
+pub fn clearCellsToReset() void {
+    return impl_ClearCellsToReset();
+}
+pub fn clearDestinationOverrides() void {
+    return impl_ClearDestinationOverrides();
+}
 
 pub fn saveMapTileImageFile(index: c_uint, file_path: [:0]const u8) void {
     return impl_SaveMapTileImageFile(index, file_path);
