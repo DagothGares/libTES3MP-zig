@@ -1,57 +1,90 @@
 const std = @import("std");
 
-pub fn messageBox(pid: c_ushort, gui_id: c_int, label: [:0]const u8) void {
-    return impl_MessageBox(pid, gui_id, label);
-}
-pub fn customMessageBox(pid: c_ushort, gui_id: c_int, label: [:0]const u8, buttons: [:0]const u8) void {
-    return impl_CustomMessageBox(pid, gui_id, label, buttons);
-}
-pub fn inputDialog(pid: c_ushort, gui_id: c_int, label: [:0]const u8, note: [:0]const u8) void {
-    return impl_InputDialog(pid, gui_id, label, note);
-}
-pub fn passwordDialog(pid: c_ushort, gui_id: c_int, label: [:0]const u8, note: [:0]const u8) void {
-    return impl_PasswordDialog(pid, gui_id, label, note);
-}
-pub fn listBox(pid: c_ushort, gui_id: c_int, label: [:0]const u8, items: [:0]const u8) void {
-    return impl_ListBox(pid, gui_id, label, items);
-}
-pub fn clearQuickKeyChanges(pid: c_ushort) void {
-    return impl_ClearQuickKeyChanges(pid);
-}
-pub fn getQuickKeyChangesSize(pid: c_ushort) c_uint {
-    return impl_GetQuickKeyChangesSize(pid);
-}
-pub fn addQuickKey(pid: c_ushort, slot: c_ushort, quick_key_type: c_int, item_id: [:0]const u8) void {
-    return impl_AddQuickKey(pid, slot, quick_key_type, item_id);
-}
-pub fn getQuickKeySlot(pid: c_ushort, index: c_uint) c_int {
-    std.debug.assert(getQuickKeyChangesSize(pid) > index);
+const shared = @import("shared.zig");
 
-    return impl_GetQuickKeySlot(pid, index);
-}
-pub fn getQuickKeyType(pid: c_ushort, index: c_uint) c_int {
-    std.debug.assert(getQuickKeyChangesSize(pid) > index);
+pub const QuickKeyType = enum(u2) {
+    item,
+    item_magic,
+    magic,
+    unassigned,
+};
 
-    return impl_GetQuickKeyType(pid, index);
+pub fn messageBox(pid: u16, id: i32, label: [:0]const u8) callconv(.C) void {
+    return raw.messageBox(pid, id, label);
 }
-pub fn getQuickKeyItemId(pid: c_ushort, index: c_uint) callconv(.C) u8 {
-    std.debug.assert(getQuickKeyChangesSize(pid) > index);
-
-    return impl_GetQuickKeyItemId(pid, index);
+pub fn customMessageBox(pid: u16, id: i32, label: [:0]const u8, buttons: [:0]const u8) callconv(.C) void {
+    return raw.customMessageBox(pid, id, label, buttons);
 }
-pub fn sendQuickKeyChanges(pid: c_ushort) void {
-    return impl_SendQuickKeyChanges(pid);
+pub fn inputDialog(pid: u16, id: i32, label: [:0]const u8, note: [:0]const u8) callconv(.C) void {
+    return raw.inputDialog(pid, id, label, note);
+}
+pub fn passwordDialog(pid: u16, id: i32, label: [:0]const u8, note: [:0]const u8) void {
+    return raw.passwordDialog(pid, id, label, note);
+}
+pub fn listBox(pid: u16, id: i32, label: [:0]const u8, items: [:0]const u8) void {
+    return raw.listBox(pid, id, label, items);
 }
 
-extern "libTES3MP-core" fn impl_MessageBox(c_ushort, c_int, [*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_CustomMessageBox(c_ushort, c_int, [*:0]const u8, [*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_InputDialog(c_ushort, c_int, [*:0]const u8, [*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_PasswordDialog(c_ushort, c_int, [*:0]const u8, [*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_ListBox(c_ushort, c_int, [*:0]const u8, [*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_ClearQuickKeyChanges(c_ushort) callconv(.C) void;
-extern "libTES3MP-core" fn impl_GetQuickKeyChangesSize(c_ushort) callconv(.C) c_uint;
-extern "libTES3MP-core" fn impl_AddQuickKey(c_ushort, c_ushort, c_int, [*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_GetQuickKeySlot(c_ushort, c_uint) callconv(.C) c_int;
-extern "libTES3MP-core" fn impl_GetQuickKeyType(c_ushort, c_uint) callconv(.C) c_int;
-extern "libTES3MP-core" fn impl_GetQuickKeyItemId(c_ushort, c_uint) callconv(.C) ?[*:0]const u8;
-extern "libTES3MP-core" fn impl_SendQuickKeyChanges(c_ushort) callconv(.C) void;
+pub fn clearQuickKeyChanges(pid: u16) void {
+    return raw.clearQuickKeyChanges(pid);
+}
+
+pub fn getQuickKeyChangesSize(pid: u16) u32 {
+    return raw.getQuickKeyChangesSize(pid);
+}
+
+pub fn getQuickKeySlot(pid: u16, index: u32) u32 {
+    shared.triggerSafetyCheck(getQuickKeyChangesSize(pid), index);
+
+    return @intCast(raw.getQuickKeySlot(pid, index));
+}
+pub fn getQuickKeyType(pid: u16, index: u32) QuickKeyType {
+    shared.triggerSafetyCheck(getQuickKeyChangesSize(pid), index);
+
+    return @enumFromInt(raw.getQuickKeyType(pid, index));
+}
+pub fn getQuickKeyItemId(pid: u16, index: u32) [:0]const u8 {
+    shared.triggerSafetyCheck(getQuickKeyChangesSize(pid), index);
+
+    return std.mem.span(raw.getQuickKeyItemId(pid, index).?);
+}
+
+pub fn addQuickKey(pid: u16, slot: u16, key_type: QuickKeyType, itemId: [:0]const u8) void {
+    return raw.addQuickKey(pid, slot, @intFromEnum(key_type), itemId);
+}
+
+pub fn sendQuickKeyChanges(pid: u16) void {
+    return raw.sendQuickKeyChanges(pid);
+}
+
+pub const raw = struct {
+    extern "libTES3MP-core" fn libtes3mp_MessageBox(pid: c_ushort, id: c_int, label: [*:0]const u8) callconv(.C) void;
+    pub const messageBox = libtes3mp_MessageBox;
+    extern "libTES3MP-core" fn libtes3mp_CustomMessageBox(pid: c_ushort, id: c_int, label: [*:0]const u8, buttons: [*:0]const u8) callconv(.C) void;
+    pub const customMessageBox = libtes3mp_CustomMessageBox;
+    extern "libTES3MP-core" fn libtes3mp_InputDialog(pid: c_ushort, id: c_int, label: [*:0]const u8, note: [*:0]const u8) callconv(.C) void;
+    pub const inputDialog = libtes3mp_InputDialog;
+    extern "libTES3MP-core" fn libtes3mp_PasswordDialog(pid: c_ushort, id: c_int, label: [*:0]const u8, note: [*:0]const u8) callconv(.C) void;
+    pub const passwordDialog = libtes3mp_PasswordDialog;
+    extern "libTES3MP-core" fn libtes3mp_ListBox(pid: c_ushort, id: c_int, label: [*:0]const u8, items: [*:0]const u8) callconv(.C) void;
+    pub const listBox = libtes3mp_ListBox;
+
+    extern "libTES3MP-core" fn libtes3mp_ClearQuickKeyChanges(pid: c_ushort) callconv(.C) void;
+    pub const clearQuickKeyChanges = libtes3mp_ClearQuickKeyChanges;
+
+    extern "libTES3MP-core" fn libtes3mp_GetQuickKeyChangesSize(pid: c_ushort) callconv(.C) c_uint;
+    pub const getQuickKeyChangesSize = libtes3mp_GetQuickKeyChangesSize;
+
+    extern "libTES3MP-core" fn libtes3mp_GetQuickKeySlot(pid: c_ushort, index: c_uint) callconv(.C) c_int;
+    pub const getQuickKeySlot = libtes3mp_GetQuickKeySlot;
+    extern "libTES3MP-core" fn libtes3mp_GetQuickKeyType(pid: c_ushort, index: c_uint) callconv(.C) c_int;
+    pub const getQuickKeyType = libtes3mp_GetQuickKeyType;
+    extern "libTES3MP-core" fn libtes3mp_GetQuickKeyItemId(pid: c_ushort, index: c_uint) callconv(.C) ?[*:0]const u8;
+    pub const getQuickKeyItemId = libtes3mp_GetQuickKeyItemId;
+
+    extern "libTES3MP-core" fn libtes3mp_AddQuickKey(pid: c_ushort, slot: c_ushort, key_type: c_int, itemId: [*:0]const u8) callconv(.C) void;
+    pub const addQuickKey = libtes3mp_AddQuickKey;
+
+    extern "libTES3MP-core" fn libtes3mp_SendQuickKeyChanges(pid: c_ushort) callconv(.C) void;
+    pub const sendQuickKeyChanges = libtes3mp_SendQuickKeyChanges;
+};

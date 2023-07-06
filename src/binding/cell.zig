@@ -1,59 +1,97 @@
 const std = @import("std");
 
-pub fn getCellStateChangesSize(pid: c_ushort) c_uint {
-    return impl_GetCellStateChangesSize(pid);
-}
-pub fn getCellStateType(pid: c_ushort, index: c_uint) c_uint {
-    std.debug.assert(getCellStateChangesSize(pid) > index);
+const shared = @import("shared.zig");
 
-    return impl_GetCellStateType(pid, index);
-}
-pub fn getCellStateDescription(pid: c_ushort, index: c_uint) [:0]const u8 {
-    std.debug.assert(getCellStateChangesSize(pid) > index);
+pub const CellState = enum(u1) {
+    load,
+    unload,
+};
 
-    return impl_GetCellStateDescription();
+pub fn getCellStateChangesSize(pid: u16) c_uint {
+    return raw.getCellStateChangesSize(pid);
 }
-pub fn getCell(pid: c_ushort) [:0]const u8 {
-    return std.mem.span(impl_GetCell(pid).?);
-}
-pub fn getExteriorX(pid: c_ushort) c_int {
-    return impl_GetExteriorX(pid);
-}
-pub fn getExteriorY(pid: c_ushort) c_int {
-    return impl_GetExteriorY(pid);
-}
-pub fn isInExterior(pid: c_ushort) bool {
-    return impl_IsInExterior(pid);
-}
-pub fn getRegion(pid: c_ushort) [:0]const u8 {
-    std.debug.assert(isInExterior(pid));
+pub fn getCellStateType(pid: u16, index: u32) CellState {
+    shared.triggerSafetyCheck(getCellStateChangesSize(pid), index);
 
-    return std.mem.span(impl_GetRegion(pid).?);
+    return @enumFromInt(raw.getCellStateType(pid, index));
 }
-pub fn isChangingRegion(pid: c_ushort) bool {
-    std.debug.assert(isInExterior(pid));
+pub fn getCellStateDescription(pid: u16, index: u32) [:0]const u8 {
+    shared.triggerSafetyCheck(getCellStateChangesSize(pid), index);
 
-    return impl_IsChangingRegion(pid);
+    return std.mem.span(raw.getCellStateDescription(pid, index).?);
 }
-pub fn setCell(pid: c_ushort, cell_description: [:0]const u8) void {
-    return impl_SetCell(pid, cell_description);
+pub fn getCell(pid: u16) [:0]const u8 {
+    return raw.getCell(pid);
 }
-pub fn setExteriorCell(pid: c_ushort, x: c_int, y: c_int) void {
-    return impl_SetExteriorCell(pid, x, y);
+pub fn getExteriorX(pid: u16) c_int {
+    return raw.getExteriorX(pid);
 }
-pub fn sendCell(pid: c_ushort) void {
-    return impl_SendCell(pid);
+pub fn getExteriorY(pid: u16) c_int {
+    return raw.getExteriorY(pid);
+}
+pub fn isInExterior(pid: u16) bool {
+    return raw.isInExterior(pid);
+}
+pub fn getRegion(pid: u16) ?[:0]const u8 {
+    if (isInExterior(pid))
+        return std.mem.span(raw.getRegion(pid).?)
+    else
+        return null;
+}
+pub fn isChangingRegion(pid: u16) bool {
+    return raw.isChangingRegion(pid);
+}
+pub fn setCell(pid: u16, cell_description: [:0]const u8) void {
+    return raw.setCell(pid, cell_description);
+}
+pub fn setExteriorCell(pid: u16, x: i32, y: i32) void {
+    return raw.setExteriorCell(pid, x, y);
+}
+pub fn sendCell(pid: u16) void {
+    return raw.sendCell(pid);
 }
 
-extern "libTES3MP-core" fn impl_GetCellStateChangesSize(c_ushort) callconv(.C) c_uint;
-extern "libTES3MP-core" fn impl_GetCellStateType(c_ushort, c_uint) callconv(.C) c_uint;
-extern "libTES3MP-core" fn impl_GetCellStateDescription(c_ushort, c_uint) callconv(.C) ?[*:0]const u8;
-extern "libTES3MP-core" fn impl_GetCell(c_ushort) callconv(.C) ?[*:0]const u8;
-extern "libTES3MP-core" fn impl_SetCell(c_ushort, [*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SendCell(c_ushort) callconv(.C) void;
-extern "libTES3MP-core" fn impl_GetExteriorX(c_ushort) callconv(.C) c_int;
-extern "libTES3MP-core" fn impl_GetExteriorY(c_ushort) callconv(.C) c_int;
-extern "libTES3MP-core" fn impl_SetExteriorCell(c_ushort, c_int, c_int) callconv(.C) void;
-extern "libTES3MP-core" fn impl_IsInExterior(c_ushort) callconv(.C) bool;
-extern "libTES3MP-core" fn impl_GetRegion(c_ushort) callconv(.C) ?[*:0]const u8;
-extern "libTES3MP-core" fn impl_IsChangingRegion(c_ushort) callconv(.C) bool;
+pub const raw = struct {
+    extern "libTES3MP-core" fn libtes3mp_GetCellStateChangesSize(pid: c_ushort) callconv(.C) c_uint;
+    pub const getCellStateChangesSize = libtes3mp_GetCellStateChangesSize;
+
+    extern "libTES3MP-core" fn libtes3mp_GetCellStateType(
+        pid: c_ushort,
+        index: c_uint,
+    ) callconv(.C) c_uint;
+    pub const getCellStateType = libtes3mp_GetCellStateType;
+    extern "libTES3MP-core" fn libtes3mp_GetCellStateDescription(
+        pid: c_ushort,
+        index: c_uint,
+    ) callconv(.C) ?[*:0]const u8;
+    pub const getCellStateDescription = libtes3mp_GetCellStateDescription;
+
+    extern "libTES3MP-core" fn libtes3mp_GetCell(pid: c_ushort) callconv(.C) ?[*:0]const u8;
+    pub const getCell = libtes3mp_GetCell;
+    extern "libTES3MP-core" fn libtes3mp_GetExteriorX(pid: c_ushort) callconv(.C) c_int;
+    pub const getExteriorX = libtes3mp_GetExteriorX;
+    extern "libTES3MP-core" fn libtes3mp_GetExteriorY(pid: c_ushort) callconv(.C) c_int;
+    pub const getExteriorY = libtes3mp_GetExteriorY;
+    extern "libTES3MP-core" fn libtes3mp_IsInExterior(pid: c_ushort) callconv(.C) bool;
+    pub const isInExterior = libtes3mp_IsInExterior;
+
+    extern "libTES3MP-core" fn libtes3mp_GetRegion(pid: c_ushort) callconv(.C) ?[*:0]const u8;
+    pub const getRegion = libtes3mp_GetRegion;
+    extern "libTES3MP-core" fn libtes3mp_IsChangingRegion(pid: c_ushort) callconv(.C) bool;
+    pub const isChangingRegion = libtes3mp_IsChangingRegion;
+
+    extern "libTES3MP-core" fn libtes3mp_SetCell(
+        pid: c_ushort,
+        cell_description: [*:0]const u8,
+    ) callconv(.C) void;
+    pub const setCell = libtes3mp_SetCell;
+    extern "libTES3MP-core" fn libtes3mp_SetExteriorCell(
+        pid: c_ushort,
+        x: c_int,
+        y: c_int,
+    ) callconv(.C) void;
+    pub const setExteriorCell = libtes3mp_SetExteriorCell;
+
+    extern "libTES3MP-core" fn libtes3mp_SendCell(pid: c_ushort) callconv(.C) void;
+    pub const sendCell = libtes3mp_SendCell;
+};

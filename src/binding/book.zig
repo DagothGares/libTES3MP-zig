@@ -1,28 +1,49 @@
 //! Bindings to libTES3MP-core's book functions.
 const std = @import("std");
 
-pub fn clearBookChanges(pid: c_ushort) void {
-    return impl_ClearBookChanges(pid);
-}
-pub fn getBookChangesSize(pid: c_ushort) c_uint {
-    return impl_GetBookChangesSize(pid);
-}
-pub fn addBook(pid: c_ushort, bookId: [:0]const u8) void {
-    return impl_AddBook(pid, bookId);
-}
-/// TES3MP owns the value returned by this function. Copy the contents if you wish to keep it
-/// after your initial callback returns.
-pub fn getBookId(pid: c_ushort, index: c_uint) [:0]const u8 {
-    std.debug.assert(impl_GetBookChangesSize(pid) > index);
+const shared = @import("shared.zig");
 
-    return std.mem.span(impl_GetBookId(pid, index).?);
+pub fn clearBookChanges(pid: u16) void {
+    return raw.clearBookChanges(pid);
 }
-pub fn sendBookChanges(pid: c_ushort, for_everyone: bool, skip_attached_player: bool) void {
-    return impl_SendBookChanges(pid, for_everyone, skip_attached_player);
+pub fn getBookChangesSize(pid: u16) c_uint {
+    return raw.getBookChangesSize(pid);
+}
+pub fn addBook(pid: u16, book_id: [:0]const u8) void {
+    return raw.addBook(pid, book_id);
+}
+pub fn getBookId(pid: u16, index: u32) [:0]const u8 {
+    shared.triggerSafetyCheck(getBookChangesSize(pid), index);
+
+    return std.mem.span(raw.getBookId(pid, index).?);
+}
+pub fn sendBookChanges(
+    pid: u16,
+    send_to_other_players: bool,
+    skip_attached_player: bool,
+) void {
+    return raw.sendBookChanges(pid, send_to_other_players, skip_attached_player);
 }
 
-extern "libTES3MP-core" fn impl_ClearBookChanges(c_ushort) callconv(.C) void;
-extern "libTES3MP-core" fn impl_GetBookChangesSize(c_ushort) callconv(.C) c_uint;
-extern "libTES3MP-core" fn impl_AddBook(c_ushort, [*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_GetBookId(c_ushort, c_uint) callconv(.C) ?[*:0]const u8;
-extern "libTES3MP-core" fn impl_SendBookChanges(c_ushort, bool, bool) callconv(.C) void;
+pub const raw = struct {
+    extern "libTES3MP-core" fn libtes3mp_ClearBookChanges(pid: c_ushort) callconv(.C) void;
+    pub const clearBookChanges = libtes3mp_ClearBookChanges;
+    extern "libTES3MP-core" fn libtes3mp_GetBookChangesSize(pid: c_ushort) callconv(.C) c_uint;
+    pub const getBookChangesSize = libtes3mp_GetBookChangesSize;
+    extern "libTES3MP-core" fn libtes3mp_AddBook(
+        pid: c_ushort,
+        book_id: [*:0]const u8,
+    ) callconv(.C) void;
+    pub const addBook = libtes3mp_AddBook;
+    extern "libTES3MP-core" fn libtes3mp_GetBookId(
+        pid: c_ushort,
+        index: c_uint,
+    ) callconv(.C) ?[*:0]const u8;
+    pub const getBookId = libtes3mp_GetBookId;
+    extern "libTES3MP-core" fn libtes3mp_SendBookChanges(
+        pid: c_ushort,
+        send_to_other_players: bool,
+        skip_attached_player: bool,
+    ) callconv(.C) void;
+    pub const sendBookChanges = libtes3mp_SendBookChanges;
+};

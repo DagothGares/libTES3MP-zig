@@ -1,73 +1,126 @@
 const std = @import("std");
 
+const shared = @import("shared.zig");
+
 pub const FactionChangeAction = enum(u2) {
-    Rank,
-    Expulsion,
-    Reputation,
+    rank,
+    expulsion,
+    reputation,
 };
 
-pub fn clearFactionChanges(pid: c_ushort) void {
-    return impl_ClearFactionChanges(pid);
+pub fn clearFactionChanges(pid: u16) void {
+    return raw.clearFactionChanges(pid);
 }
-pub fn getFactionChangesSize(pid: c_ushort) c_uint {
-    return impl_GetFactionChangesSize(pid);
-}
-pub fn getFactionChangesAction(pid: c_ushort) FactionChangeAction {
-    return @enumFromInt(FactionChangeAction, impl_GetFactionChangesAction(pid));
-}
-pub fn getFactionId(pid: c_ushort, index: c_uint) [:0]const u8 {
-    std.debug.assert(getFactionChangesSize(pid) > index);
 
-    return std.mem.span(impl_GetFactionId(pid, index).?);
+pub fn getFactionChangesSize(pid: u16) u32 {
+    return raw.getFactionChangesSize(pid);
 }
-pub fn getFactionRank(pid: c_ushort, index: c_uint) c_int {
-    std.debug.assert(getFactionChangesSize(pid) > index);
+pub fn getFactionChangesAction(pid: u16) FactionChangeAction {
+    return @enumFromInt(raw.getFactionChangesAction(pid));
+}
 
-    return impl_GetFactionRank(pid, index);
-}
-pub fn getFactionExpulsionState(pid: c_ushort, index: c_uint) bool {
-    std.debug.assert(getFactionChangesSize(pid) > index);
+pub fn getFactionId(pid: u16, index: u32) [:0]const u8 {
+    shared.triggerSafetyCheck(getFactionChangesSize(pid), index);
 
-    return impl_GetFactionExpulsionState(pid, index);
+    return std.mem.span(raw.getFactionId(pid, index).?);
 }
-pub fn getFactionReputation(pid: c_ushort, index: c_uint) c_int {
-    std.debug.assert(getFactionChangesSize(pid) > index);
+pub fn getFactionRank(pid: u16, index: u32) i32 {
+    shared.triggerSafetyCheck(getFactionChangesSize(pid), index);
 
-    return impl_GetFactionReputation(pid, index);
+    return raw.getFactionRank(pid, index);
 }
-pub fn setFactionChangesAction(pid: c_ushort, action: FactionChangeAction) void {
-    return impl_SetFactionChangesAction(pid, @intFromEnum(action));
+pub fn getFactionExpulsionState(pid: u16, index: u32) bool {
+    shared.triggerSafetyCheck(getFactionChangesSize(pid), index);
+
+    return raw.getFactionExpulsionState(pid, index);
+}
+pub fn getFactionReputation(pid: u32, index: u32) i32 {
+    shared.triggerSafetyCheck(getFactionChangesSize(pid), index);
+
+    return raw.getFactionReputation(pid, index);
+}
+
+pub fn setFactionChangesAction(pid: u16, action: FactionChangeAction) void {
+    return raw.setFactionChangesAction(pid, @intFromEnum(action));
 }
 pub fn setFactionId(faction_id: [:0]const u8) void {
-    return impl_SetFactionId(faction_id);
+    return raw.setFactionId(faction_id);
 }
-pub fn setFactionRank(rank: c_uint) void {
-    return impl_SetFactionRank(rank);
+pub fn setFactionRank(rank: u32) void {
+    return raw.setFactionRank(rank);
 }
 pub fn setFactionExpulsionState(expulsion_state: bool) void {
-    return impl_SetFactionExpulsionState(expulsion_state);
+    return raw.setFactionExpulsionState(expulsion_state);
 }
 pub fn setFactionReputation(reputation: c_int) void {
-    return impl_SetFactionReputation(reputation);
-}
-pub fn addFaction(pid: c_ushort) void {
-    return impl_AddFaction(pid);
-}
-pub fn sendFactionChanges(pid: c_ushort, for_everyone: bool, skip_attached_player: bool) void {
-    return impl_SendFactionChanges(pid, for_everyone, skip_attached_player);
+    return raw.setFactionReputation(reputation);
 }
 
-extern "libTES3MP-core" fn impl_ClearFactionChanges(c_ushort) void;
-extern "libTES3MP-core" fn impl_GetFactionChangesSize(c_ushort) c_uint;
-extern "libTES3MP-core" fn impl_GetFactionChangesAction(c_ushort) u8;
-extern "libTES3MP-core" fn impl_GetFactionId(c_ushort, c_uint) ?[*:0]const u8;
-extern "libTES3MP-core" fn impl_GetFactionRank(c_ushort, c_uint) c_int;
-extern "libTES3MP-core" fn impl_GetFactionExpulsionState(c_ushort, c_uint) bool;
-extern "libTES3MP-core" fn impl_GetFactionReputation(c_ushort, c_uint) c_int;
-extern "libTES3MP-core" fn impl_SetFactionChangesAction(c_ushort, u8) void;
-extern "libTES3MP-core" fn impl_SetFactionId([*:0]const u8) void;
-extern "libTES3MP-core" fn impl_SetFactionRank(c_uint) void;
-extern "libTES3MP-core" fn impl_SetFactionExpulsionState(bool) void;
-extern "libTES3MP-core" fn impl_SetFactionReputation(c_int) void;
-extern "libTES3MP-core" fn impl_AddFaction(c_ushort) void;
-extern "libTES3MP-core" fn impl_SendFactionChanges(c_ushort, bool, bool) void;
+pub fn addFaction(pid: u16) void {
+    return raw.addFaction(pid);
+}
+
+pub fn sendFactionChanges(
+    pid: u16,
+    send_to_other_players: bool,
+    skip_attached_player: bool,
+) void {
+    return raw.sendFactionChanges(pid, send_to_other_players, skip_attached_player);
+}
+
+pub const raw = struct {
+    extern "libTES3MP-core" fn libtes3mp_ClearFactionChanges(pid: c_ushort) callconv(.C) void;
+    pub const clearFactionChanges = libtes3mp_ClearFactionChanges;
+
+    extern "libTES3MP-core" fn libtes3mp_GetFactionChangesSize(pid: c_ushort) callconv(.C) c_uint;
+    pub const getFactionChangesSize = libtes3mp_GetFactionChangesSize;
+    extern "libTES3MP-core" fn libtes3mp_GetFactionChangesAction(pid: c_ushort) callconv(.C) u8;
+    pub const getFactionChangesAction = libtes3mp_GetFactionChangesAction;
+
+    extern "libTES3MP-core" fn libtes3mp_GetFactionId(
+        pid: c_ushort,
+        index: c_uint,
+    ) callconv(.C) ?[*:0]const u8;
+    pub const getFactionId = libtes3mp_GetFactionId;
+    extern "libTES3MP-core" fn libtes3mp_GetFactionRank(
+        pid: c_ushort,
+        index: c_uint,
+    ) callconv(.C) c_int;
+    pub const getFactionRank = libtes3mp_GetFactionRank;
+    extern "libTES3MP-core" fn libtes3mp_GetFactionExpulsionState(
+        pid: c_ushort,
+        index: c_uint,
+    ) callconv(.C) bool;
+    pub const getFactionExpulsionState = libtes3mp_GetFactionExpulsionState;
+    extern "libTES3MP-core" fn libtes3mp_GetFactionReputation(
+        pid: c_ushort,
+        index: c_uint,
+    ) callconv(.C) c_int;
+    pub const getFactionReputation = libtes3mp_GetFactionReputation;
+
+    extern "libTES3MP-core" fn libtes3mp_SetFactionChangesAction(
+        pid: c_ushort,
+        action: u8,
+    ) callconv(.C) void;
+    pub const setFactionChangesAction = libtes3mp_SetFactionChangesAction;
+    extern "libTES3MP-core" fn libtes3mp_SetFactionId(faction_id: [*:0]const u8) callconv(.C) void;
+    pub const setFactionId = libtes3mp_SetFactionId;
+    extern "libTES3MP-core" fn libtes3mp_SetFactionRank(rank: c_uint) callconv(.C) void;
+    pub const setFactionRank = libtes3mp_SetFactionRank;
+    extern "libTES3MP-core" fn libtes3mp_SetFactionExpulsionState(
+        expulsion_state: bool,
+    ) callconv(.C) void;
+    pub const setFactionExpulsionState = libtes3mp_SetFactionExpulsionState;
+    extern "libTES3MP-core" fn libtes3mp_SetFactionReputation(reputation: c_int) callconv(.C) void;
+    pub const setFactionReputation = libtes3mp_SetFactionReputation;
+
+    extern "libTES3MP-core" fn libtes3mp_AddFaction(pid: c_ushort) callconv(.C) void;
+    pub const addFaction = libtes3mp_AddFaction;
+
+    extern "libTES3MP-core" fn libtes3mp_SendFactionChanges(
+        pid: c_ushort,
+        send_to_other_players: bool,
+        skip_attached_player: bool,
+    ) callconv(.C) void;
+    pub const sendFactionChanges = libtes3mp_SendFactionChanges;
+};

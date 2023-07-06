@@ -1,140 +1,159 @@
 const std = @import("std");
 
+const shared = @import("shared.zig");
+
 pub const Specialization = enum(u2) {
-    Combat,
-    Magic,
-    Stealth,
+    combat,
+    magic,
+    stealth,
 };
 
 pub const Attribute = enum(u4) {
-    Strength,
-    Intelligence,
-    Willpower,
-    Agility,
-    Speed,
-    Endurance,
-    Personality,
-    Luck,
+    strength,
+    intelligence,
+    willpower,
+    agility,
+    speed,
+    endurance,
+    personality,
+    luck,
 };
 
 pub const Skill = enum(u5) {
     // Combat
-    Block,
-    Armorer,
-    MediumArmor,
-    HeavyArmor,
-    BluntWeapon,
-    LongBlade,
-    Axe,
-    Spear,
-    Athletics,
+    block,
+    armorer,
+    medium_armor,
+    heavy_armor,
+    blunt_weapon,
+    long_blade,
+    axe,
+    spear,
+    athletics,
     // Magic
-    Enchant,
-    Destruction,
-    Alteration,
-    Illusion,
-    Conjuration,
-    Mysticism,
-    Restoration,
-    Alchemy,
-    Unarmored,
+    enchant,
+    destruction,
+    alteration,
+    illusion,
+    conjuration,
+    mysticism,
+    restoration,
+    alchemy,
+    unarmored,
     // Stealth
-    Security,
-    Sneak,
-    Acrobatics,
-    LightArmor,
-    ShortBlade,
-    Marksman,
-    Mercantile,
-    Speechcraft,
-    HandToHand,
+    security,
+    sneak,
+    acrobatics,
+    light_armor,
+    short_blade,
+    marksman,
+    mercantile,
+    speechcraft,
+    hand_to_hand,
 };
 
-/// TES3MP owns the value returned by this function. Copy the contents if you wish to keep it
-/// after your initial callback returns.
-pub fn getDefaultClass(pid: c_ushort) [:0]const u8 {
+pub fn getDefaultClass(pid: u16) [:0]const u8 {
     std.debug.assert(isClassDefault(pid));
 
-    return std.mem.span(impl_GetDefaultClass(pid).?);
+    return std.mem.span(raw.getDefaultClass(pid).?);
 }
-/// TES3MP owns the value returned by this function. Copy the contents if you wish to keep it
-/// after your initial callback returns.
-pub fn getClassName(pid: c_ushort) [:0]const u8 {
+pub fn getClassName(pid: u16) [:0]const u8 {
     std.debug.assert(!isClassDefault(pid));
 
-    return std.mem.span(impl_GetClassName(pid).?);
+    return std.mem.span(raw.getClassName(pid).?);
 }
-/// TES3MP owns the value returned by this function. Copy the contents if you wish to keep it
-/// after your initial callback returns.
-pub fn getClassDesc(pid: c_ushort) [:0]const u8 {
+pub fn getClassDesc(pid: u16) [:0]const u8 {
     std.debug.assert(!isClassDefault(pid));
 
-    return std.mem.span(impl_GetClassDesc(pid).?);
+    return std.mem.span(raw.getClassDesc(pid).?);
 }
-pub fn getClassMajorAttribute(pid: c_ushort, slot: u1) Attribute {
+pub fn getClassMajorAttribute(pid: u16, slot: u1) Attribute {
     std.debug.assert(!isClassDefault(pid));
 
-    return @enumFromInt(Attribute, impl_GetClassMajorAttribute(pid, slot));
+    return @enumFromInt(raw.getClassMajorAttribute(pid, slot));
 }
-pub fn getClassSpecialization(pid: c_ushort) Specialization {
+pub fn getClassSpecialization(pid: u16) Specialization {
     std.debug.assert(!isClassDefault(pid));
 
-    return @enumFromInt(Specialization, impl_GetClassSpecialization(pid));
+    return @enumFromInt(raw.getClassSpecialization(pid));
 }
-pub fn getClassMajorSkill(pid: c_ushort, slot: u3) Skill {
+pub fn getClassMajorSkill(pid: u16, slot: u3) Skill {
     std.debug.assert(!isClassDefault(pid));
 
-    return @enumFromInt(Skill, impl_GetClassMajorSkill(pid, slot));
+    return @enumFromInt(raw.getClassMajorSkill(pid, slot));
 }
-pub fn getClassMinorSkill(pid: c_ushort, slot: u3) Skill {
+pub fn getClassMinorSkill(pid: u16, slot: u3) Skill {
     std.debug.assert(!isClassDefault(pid));
 
-    return @enumFromInt(Skill, impl_GetClassMinorSkill(pid, slot));
+    return @enumFromInt(raw.getClassMinorSkill(pid, slot));
 }
-pub fn isClassDefault(pid: c_ushort) bool {
-    return impl_IsClassDefault(pid) != 0;
-}
-
-pub fn setDefaultClass(pid: c_ushort, class_id: [:0]const u8) void {
-    return impl_SetDefaultClass(pid, class_id);
-}
-pub fn setClassName(pid: c_ushort, name: [:0]const u8) void {
-    return impl_SetClassName(pid, name);
-}
-pub fn setClassDesc(pid: c_ushort, description: [:0]const u8) void {
-    return impl_SetClassDesc(pid, description);
-}
-pub fn setClassMajorAttribute(pid: c_ushort, slot: u1, attribute: Attribute) void {
-    return impl_SetClassMajorAttribute(pid, slot, @intFromEnum(attribute));
-}
-pub fn setClassSpecialization(pid: c_ushort, specialization: Specialization) void {
-    return impl_SetClassSpecialization(pid, @intFromEnum(specialization));
-}
-pub fn setClassMajorSkill(pid: c_ushort, slot: u3, skill: Skill) void {
-    return impl_SetClassMajorSkill(pid, slot, @intFromEnum(skill));
-}
-pub fn setClassMinorSkill(pid: c_ushort, slot: u3, skill: Skill) void {
-    return impl_SetClassMinorSkill(pid, slot, @intFromEnum(skill));
-}
-pub fn sendClass(pid: c_ushort) void {
-    return impl_SendClass(pid);
+pub fn isClassDefault(pid: u16) bool {
+    return raw.isClassDefault(pid) != 0;
 }
 
-extern "libTES3MP-core" fn impl_GetDefaultClass(c_ushort) callconv(.C) ?[*:0]const u8;
-extern "libTES3MP-core" fn impl_GetClassName(c_ushort) callconv(.C) ?[*:0]const u8;
-extern "libTES3MP-core" fn impl_GetClassDesc(c_ushort) callconv(.C) ?[*:0]const u8;
-extern "libTES3MP-core" fn impl_GetClassMajorAttribute(c_ushort, u8) callconv(.C) c_int;
-extern "libTES3MP-core" fn impl_GetClassSpecialization(c_ushort) callconv(.C) c_int;
-extern "libTES3MP-core" fn impl_GetClassMajorSkill(c_ushort, u8) callconv(.C) c_int;
-extern "libTES3MP-core" fn impl_GetClassMinorSkill(c_ushort, u8) callconv(.C) c_int;
-extern "libTES3MP-core" fn impl_IsClassDefault(c_ushort) callconv(.C) c_int;
+pub fn setDefaultClass(pid: u16, id: [:0]const u8) void {
+    return raw.setDefaultClass(pid, id);
+}
+pub fn setClassName(pid: u16, name: [:0]const u8) void {
+    return raw.setClassName(pid, name);
+}
+pub fn setClassDesc(pid: u16, desc: [:0]const u8) void {
+    return raw.setClassDesc(pid, desc);
+}
+pub fn setClassMajorAttribute(pid: u16, slot: u1, attribute: Attribute) void {
+    return raw.setClassMajorAttribute(pid, slot, @intFromEnum(attribute));
+}
+pub fn setClassSpecialization(pid: u16, spec: Specialization) void {
+    return raw.setClassSpecialization(pid, @intFromEnum(spec));
+}
+pub fn setClassMajorSkill(pid: u16, slot: u3, skill: Skill) void {
+    shared.triggerSafetyCheck(5, slot);
 
-extern "libTES3MP-core" fn impl_SetDefaultClass(c_ushort, [*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetClassName(c_ushort, [*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetClassDesc(c_ushort, [*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetClassMajorAttribute(c_ushort, u8, c_int) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetClassSpecialization(c_ushort, c_int) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetClassMajorSkill(c_ushort, u8, c_int) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetClassMinorSkill(c_ushort, u8, c_int) callconv(.C) void;
+    return raw.setClassMajorSkill(pid, slot, @intFromEnum(skill));
+}
+pub fn setClassMinorSkill(pid: u16, slot: u3, skill: Skill) void {
+    shared.triggerSafetyCheck(5, slot);
 
-extern "libTES3MP-core" fn impl_SendClass(c_ushort) callconv(.C) void;
+    return raw.setClassMinorSkill(pid, slot, @intFromEnum(skill));
+}
+
+pub fn sendClass(pid: u16) void {
+    return raw.sendClass(pid);
+}
+
+pub const raw = struct {
+    extern "libTES3MP-core" fn libtes3mp_GetDefaultClass(pid: c_ushort) callconv(.C) ?[*:0]const u8;
+    pub const getDefaultClass = libtes3mp_GetDefaultClass;
+    extern "libTES3MP-core" fn libtes3mp_GetClassName(pid: c_ushort) callconv(.C) ?[*:0]const u8;
+    pub const getClassName = libtes3mp_GetClassName;
+    extern "libTES3MP-core" fn libtes3mp_GetClassDesc(pid: c_ushort) callconv(.C) ?[*:0]const u8;
+    pub const getClassDesc = libtes3mp_GetClassDesc;
+    extern "libTES3MP-core" fn libtes3mp_GetClassMajorAttribute(pid: c_ushort, slot: u8) callconv(.C) c_int;
+    pub const getClassMajorAttribute = libtes3mp_GetClassMajorAttribute;
+    extern "libTES3MP-core" fn libtes3mp_GetClassSpecialization(pid: c_ushort) callconv(.C) c_int;
+    pub const getClassSpecialization = libtes3mp_GetClassSpecialization;
+    extern "libTES3MP-core" fn libtes3mp_GetClassMajorSkill(pid: c_ushort, slot: u8) callconv(.C) c_int;
+    pub const getClassMajorSkill = libtes3mp_GetClassMajorSkill;
+    extern "libTES3MP-core" fn libtes3mp_GetClassMinorSkill(pid: c_ushort, slot: u8) callconv(.C) c_int;
+    pub const getClassMinorSkill = libtes3mp_GetClassMinorSkill;
+    extern "libTES3MP-core" fn libtes3mp_IsClassDefault(pid: c_ushort) callconv(.C) c_int;
+    pub const isClassDefault = libtes3mp_IsClassDefault;
+
+    extern "libTES3MP-core" fn libtes3mp_SetDefaultClass(pid: c_ushort, id: [*:0]const u8) callconv(.C) void;
+    pub const setDefaultClass = libtes3mp_SetDefaultClass;
+    extern "libTES3MP-core" fn libtes3mp_SetClassName(pid: c_ushort, name: [*:0]const u8) callconv(.C) void;
+    pub const setClassName = libtes3mp_SetClassName;
+    extern "libTES3MP-core" fn libtes3mp_SetClassDesc(pid: c_ushort, desc: [*:0]const u8) callconv(.C) void;
+    pub const setClassDesc = libtes3mp_SetClassDesc;
+    extern "libTES3MP-core" fn libtes3mp_SetClassMajorAttribute(pid: c_ushort, slot: u8, attr_id: c_int) callconv(.C) void;
+    pub const setClassMajorAttribute = libtes3mp_SetClassMajorAttribute;
+    extern "libTES3MP-core" fn libtes3mp_SetClassSpecialization(pid: c_ushort, spec: c_int) callconv(.C) void;
+    pub const setClassSpecialization = libtes3mp_SetClassSpecialization;
+    extern "libTES3MP-core" fn libtes3mp_SetClassMajorSkill(pid: c_ushort, slot: u8, skill_id: c_int) callconv(.C) void;
+    pub const setClassMajorSkill = libtes3mp_SetClassMajorSkill;
+    extern "libTES3MP-core" fn libtes3mp_SetClassMinorSkill(pid: c_ushort, slot: u8, skill_id: c_int) callconv(.C) void;
+    pub const setClassMinorSkill = libtes3mp_SetClassMinorSkill;
+
+    extern "libTES3MP-core" fn libtes3mp_SendClass(pid: c_ushort) callconv(.C) void;
+    pub const sendClass = libtes3mp_SendClass;
+};

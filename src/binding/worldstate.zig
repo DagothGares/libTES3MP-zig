@@ -1,377 +1,397 @@
 const std = @import("std");
 
+const shared = @import("shared.zig");
+
 pub const Weather = enum(u4) {
-    Clear,
-    Cloudy,
-    Foggy,
-    Overcast,
-    Rain,
-    Thunder,
-    Ash,
-    Blight,
-    Snow,
-    Blizzard,
+    clear,
+    cloudy,
+    foggy,
+    overcast,
+    rain,
+    thunder,
+    ash,
+    blight,
+    snow,
+    blizzard,
 };
 
-pub const VariableType = enum(u3) {
-    Short,
-    Long,
-    Float,
+pub const VariableType = @import("object.zig").VariableType;
 
-    /// It is unclear if this type is implemented,
-    /// and what the difference is from a standard long.
-    Int,
-    /// It is unclear if this type is implemented.
-    String,
-};
-
-const VariableTypeError = error{MustBeInteger};
-
-pub fn readReceivedWorldState() void {
-    return impl_ReadReceivedWorldstate();
+pub fn readReceivedWorldstate() void {
+    return raw.readReceivedWorldstate();
 }
 
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
-pub fn copyReceivedWorldStateToStore() void {
-    return impl_CopyReceivedWorldstateToStore();
+pub fn copyReceivedWorldstateToStore() void {
+    return raw.copyReceivedWorldstateToStore();
 }
 
 pub fn clearKillChanges() void {
-    return impl_ClearKillChanges();
+    return raw.clearKillChanges();
 }
 pub fn clearMapChanges() void {
-    return impl_ClearMapChanges();
+    return raw.clearMapChanges();
 }
 pub fn clearClientGlobals() void {
-    return impl_ClearClientGlobals();
+    return raw.clearClientGlobals();
 }
 
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
 pub fn getKillChangesSize() c_uint {
-    return impl_GetKillChangesSize();
+    return raw.getKillChangesSize();
 }
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
 pub fn getMapChangesSize() c_uint {
-    return impl_GetMapChangesSize();
+    return raw.getMapChangesSize();
 }
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
-pub fn getClientGlobalsSize() c_uint {
-    return impl_GetClientGlobalsSize();
-}
-
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
-///
-/// TES3MP owns the value returned by this function. Copy the contents if you wish to keep it
-/// after your initial callback returns.
-pub fn getKillRefId(index: c_uint) [:0]const u8 {
-    std.debug.assert(getKillChangesSize() > index);
-
-    return std.mem.span(impl_GetKillRefId(index).?);
-}
-pub fn getKillNumber(index: c_uint) c_uint {
-    std.debug.assert(getKillChangesSize() > index);
-
-    return impl_GetKillNumber(index);
+pub fn getClientGlobalsSize() u32 {
+    return raw.getClientGlobalsSize();
 }
 
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
-///
-/// TES3MP owns the value returned by this function. Copy the contents if you wish to keep it
-/// after your initial callback returns.
+pub fn getKillRefId(index: u32) [:0]const u8 {
+    shared.triggerSafetyCheck(getKillChangesSize(), index);
+
+    return std.mem.span(raw.getKillRefId().?);
+}
+pub fn getKillNumber(index: u32) i32 {
+    shared.triggerSafetyCheck(getKillChangesSize(), index);
+
+    return raw.getKillNumber(index);
+}
+
 pub fn getWeatherRegion() [:0]const u8 {
-    return std.mem.span(impl_GetWeatherRegion().?);
+    return std.mem.span(raw.getWeatherRegion().?);
 }
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
 pub fn getWeatherCurrent() Weather {
-    return @enumFromInt(Weather, impl_GetWeatherCurrent());
+    return @enumFromInt(raw.getWeatherCurrent());
 }
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
 pub fn getWeatherNext() Weather {
-    return @enumFromInt(Weather, impl_GetWeatherNext());
+    return @enumFromInt(raw.getWeatherNext());
 }
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
 pub fn getWeatherQueued() Weather {
-    return @enumFromInt(Weather, impl_GetWeatherQueued());
+    return @enumFromInt(raw.getWeatherQueued());
 }
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
-pub fn getWeatherTransitionFactor() f32 {
-    return @floatCast(f32, impl_GetWeatherTransitionFactor());
-}
-
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
-pub fn getMapTileCellX(index: c_uint) c_int {
-    std.debug.assert(getMapChangesSize() > index);
-
-    return impl_GetMapTileCellX(index);
-}
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
-pub fn getMapTileCellY(index: c_uint) c_int {
-    std.debug.assert(getMapChangesSize() > index);
-
-    return impl_GetMapTileCellY(index);
+pub fn getWeatherTransitionFactor() f64 {
+    return raw.getWeatherTransitionFactor();
 }
 
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
-pub fn getClientGlobalId(index: c_uint) [:0]const u8 {
-    std.debug.assert(getClientGlobalsSize() > index);
+pub fn getMapTileCellX(index: u32) i32 {
+    shared.triggerSafetyCheck(getMapChangesSize(), index);
 
-    return impl_GetClientGlobalId(index);
+    return raw.getMapTileCellX(index);
 }
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
-pub fn getClientGlobalVariableType(index: c_uint) VariableType {
-    std.debug.assert(getClientGlobalsSize() > index);
+pub fn getMapTileCellY(index: u32) i32 {
+    shared.triggerSafetyCheck(getMapChangesSize(), index);
 
-    return @enumFromInt(VariableType, impl_GetClientGlobalVariableType(index));
+    return raw.getMapTileCellY(index);
 }
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
-pub fn getClientGlobalIntValue(index: c_uint) c_int {
-    std.debug.assert(getClientGlobalsSize() > index);
 
-    return impl_GetClientGlobalIntValue(index);
+pub fn getClientGlobalId(index: u32) [:0]const u8 {
+    shared.triggerSafetyCheck(getClientGlobalsSize(), index);
+
+    return std.mem.span(raw.getClientGlobalId().?);
 }
-/// Callers are expected to first call readReceivedWorldstate(), if necessary.
-pub fn getClientGlobalFloatValue(index: c_uint) f32 {
-    std.debug.assert(getClientGlobalsSize() > index);
+pub fn getClientGlobalVariableType(index: u32) VariableType {
+    shared.triggerSafetyCheck(getClientGlobalsSize(), index);
 
-    return @floatCast(f32, impl_GetClientGlobalFloatValue(index));
+    return raw.getClientGlobalVariableType(index);
+}
+pub fn getClientGlobal(index: u32) union(enum) { int: i32, float: f64 } {
+    return switch (getClientGlobalVariableType(index)) {
+        .short, .long => .{ .int = raw.getClientGlobalIntValue(index) },
+        .float => .{ .float = raw.getClientGlobalFloatValue(index) },
+    };
 }
 
 pub fn setAuthorityRegion(authority_region: [:0]const u8) void {
-    return impl_SetAuthorityRegion(authority_region);
+    return raw.setAuthorityRegion(authority_region);
 }
 
 pub fn setWeatherRegion(region: [:0]const u8) void {
-    return impl_SetWeatherRegion(region);
+    return raw.setWeatherRegion(region);
 }
-pub fn setWeatherForceState(state: bool) void {
-    return impl_SetWeatherForceState(state);
+pub fn setWeatherForceState(force_state: bool) void {
+    return raw.setWeatherForceState(force_state);
 }
 pub fn setWeatherCurrent(current_weather: Weather) void {
-    return impl_SetWeatherCurrent(@intFromEnum(current_weather));
+    return raw.setWeatherCurrent(@intFromEnum(current_weather));
 }
 pub fn setWeatherNext(next_weather: Weather) void {
-    return impl_SetWeatherNext(@intFromEnum(next_weather));
+    return raw.setWeatherNext(@intFromEnum(next_weather));
 }
 pub fn setWeatherQueued(queued_weather: Weather) void {
-    return impl_SetWeatherQueued(@intFromEnum(queued_weather));
+    return raw.setWeatherQueued(@intFromEnum(queued_weather));
 }
-/// Despite SetWeatherTransitionFactor claiming to use a double, it actually stores a float.
-pub fn setWeatherTransitionFactor(transition_factor: f32) void {
-    return impl_SetWeatherTransitionFactor(transition_factor);
+pub fn setWeatherTransitionFactor(transition_factor: f64) void {
+    return raw.setWeatherTransitionFactor(transition_factor);
 }
 
-/// Despite SetHour claiming to use a double, it actually stores a float.
-pub fn setHour(hour: f32) void {
-    return impl_SetHour(hour);
+pub fn setHour(hour: f64) void {
+    return raw.setHour(hour);
 }
-pub fn setDay(day: c_int) void {
-    return impl_SetDay(day);
+pub fn setDay(day: i32) void {
+    return raw.setDay(day);
 }
-pub fn setMonth(month: c_int) void {
-    return impl_SetMonth(month);
+pub fn setMonth(month: i32) void {
+    return raw.setMonth(month);
 }
-pub fn setYear(year: c_int) void {
-    return impl_SetYear(year);
+pub fn setYear(year: i32) void {
+    return raw.setYear(year);
 }
-pub fn setDaysPassed(days_passed: c_int) void {
-    return impl_SetDaysPassed(days_passed);
+pub fn setDaysPassed(days_passed: i32) void {
+    return raw.setDaysPassed(days_passed);
 }
-/// Despite SetTimeScale claiming to use a double, it actually stores a float.
-pub fn setTimeScale(timescale: f32) void {
-    return impl_SetTimeScale(timescale);
+pub fn setTimeScale(time_scale: f64) void {
+    return raw.setTimeScale(time_scale);
 }
 
 pub fn setPlayerCollisionState(state: bool) void {
-    return impl_SetPlayerCollisionState(state);
+    return raw.setPlayerCollisionState(state);
 }
 pub fn setActorCollisionState(state: bool) void {
-    return impl_SetActorCollisionState(state);
+    return raw.setActorCollisionState(state);
 }
 pub fn setPlacedObjectCollisionState(state: bool) void {
-    return impl_SetPlacedObjectCollisionState(state);
+    return raw.setPlacedObjectCollisionState(state);
 }
 pub fn useActorCollisionForPlacedObjects(use_actor_collision: bool) void {
-    return impl_UseActorCollisionForPlacedObjects(use_actor_collision);
+    return raw.useActorCollisionForPlacedObjects(use_actor_collision);
 }
 
-pub fn addKill(ref_id: [:0]const u8, count: c_int) void {
-    return impl_AddKill(ref_id, count);
+pub fn addKill(ref_id: [:0]const u8, number: i32) void {
+    return raw.addKill(ref_id, number);
 }
-pub fn addClientGlobalVariable(
-    id: [:0]const u8,
-    value: anytype,
-) void {
-    switch (@typeInfo(@TypeOf(value))) {
-        .Int => if (@bitSizeOf(value) <= @bitSizeOf(c_ushort))
-            return impl_AddClientGlobalInteger(id, @as(c_ushort, value), 0)
-        else if (@bitSizeOf(value) <= @bitSizeOf(c_uint))
-            return impl_AddClientGlobalInteger(id, @as(c_uint, value), 1)
-        else
-            @compileError("Cannot add client global variable larger than c_uint"),
-        .Float => if (@bitSizeOf(value) <= @bitSizeOf(f32))
-            return impl_AddClientGlobalFloat(id, @as(f32, value), 2)
-        else
-            @compileError("Cannot add client global variable larger than f32"),
-        else => @compileError("Not implemented for type " ++ @typeName(@TypeOf(value))),
+pub fn addClientGlobal(id: [:0]const u8, value: anytype) void {
+    const T = @TypeOf(value);
+    switch (@typeInfo(T)) {
+        .Int => |int| {
+            if (int.bits <= @typeInfo(c_ushort).Int.bits) {
+                return raw.addClientGlobalInteger(id, value, @intFromEnum(VariableType.short));
+            } else if (int.bits <= @typeInfo(c_int).Int.bits) {
+                return raw.addClientGlobalInteger(id, value, @intFromEnum(VariableType.long));
+            } else {
+                @compileError("addClientGlobal cannot be used with " ++ @typeName(T));
+            }
+        },
+        .Float => |float| {
+            if (float.bits <= 64) {
+                return raw.addClientGlobalFloat(id, value);
+            } else {
+                @compileError("addClientGlobal cannot be used with " ++ @typeName(T));
+            }
+        },
+        else => @compileError("addClientGlobal cannot be used with " ++ @typeName(T)),
     }
 }
 pub fn addSynchronizedClientScriptId(script_id: [:0]const u8) void {
-    return impl_AddSynchronizedClientScriptId(script_id);
+    return raw.addSynchronizedClientScriptId(script_id);
 }
 pub fn addSynchronizedClientGlobalId(global_id: [:0]const u8) void {
-    return impl_AddSynchronizedClientGlobalId(global_id);
+    return raw.addSynchronizedClientGlobalId(global_id);
 }
 pub fn addEnforcedCollisionRefId(ref_id: [:0]const u8) void {
-    return impl_AddEnforcedCollisionRefId(ref_id);
+    return raw.addEnforcedCollisionRefId(ref_id);
 }
 pub fn addCellToReset(cell_description: [:0]const u8) void {
-    return impl_AddCellToReset(cell_description);
+    return raw.addCellToReset(cell_description);
 }
-pub fn addDestinationOverride(old_cell: [:0]const u8, new_cell: [:0]const u8) void {
-    return impl_AddDestinationOverride(old_cell, new_cell);
+pub fn addDestinationOverride(old_cell_description: [:0]const u8, new_cell_description: [:0]const u8) void {
+    return raw.addDestinationOverride(old_cell_description, new_cell_description);
 }
 
 pub fn clearSynchronizedClientScriptIds() void {
-    return impl_ClearSynchronizedClientScriptIds();
+    return raw.clearSynchronizedClientScriptIds();
 }
 pub fn clearSynchronizedClientGlobalIds() void {
-    return impl_ClearSynchronizedClientGlobalIds();
+    return raw.clearSynchronizedClientGlobalIds();
 }
 pub fn clearEnforcedCollisionRefIds() void {
-    return impl_ClearEnforcedCollisionRefIds();
+    return raw.clearEnforcedCollisionRefIds();
 }
 pub fn clearCellsToReset() void {
-    return impl_ClearCellsToReset();
+    return raw.clearCellsToReset();
 }
 pub fn clearDestinationOverrides() void {
-    return impl_ClearDestinationOverrides();
+    return raw.clearDestinationOverrides();
 }
 
-pub fn saveMapTileImageFile(index: c_uint, file_path: [:0]const u8) void {
-    return impl_SaveMapTileImageFile(index, file_path);
-}
-pub fn loadMapTileImageFile(x: c_int, y: c_int, file_path: [:0]const u8) void {
-    return impl_LoadMapTileImageFile(x, y, file_path);
-}
+pub fn saveMapTileImageFile(index: u32, file_path: [:0]const u8) void {
+    shared.triggerSafetyCheck(getMapChangesSize(), index);
 
-pub fn sendClientScriptGlobal(pid: c_ushort, for_everyone: bool, skip_attached_player: bool) void {
-    return impl_SendClientScriptGlobal(pid, for_everyone, skip_attached_player);
+    return raw.saveMapTileImageFile(index, file_path);
 }
-pub fn sendClientScriptSettings(
-    pid: c_ushort,
-    for_everyone: bool,
-    skip_attached_player: bool,
-) void {
-    return impl_SendClientScriptSettings(pid, for_everyone, skip_attached_player);
-}
-pub fn sendWorldKillCount(pid: c_ushort, for_everyone: bool, skip_attached_player: bool) void {
-    return impl_SendWorldKillCount(pid, for_everyone, skip_attached_player);
-}
-pub fn sendWorldRegionAuthority(pid: c_ushort) void {
-    return impl_SendWorldRegionAuthority(pid);
-}
-pub fn sendWorldMap(pid: c_ushort, for_everyone: bool, skip_attached_player: bool) void {
-    return impl_SendWorldMap(pid, for_everyone, skip_attached_player);
-}
-pub fn sendWorldTime(pid: c_ushort, for_everyone: bool, skip_attached_player: bool) void {
-    return impl_SendWorldTime(pid, for_everyone, skip_attached_player);
-}
-pub fn sendWorldWeather(pid: c_ushort, for_everyone: bool, skip_attached_player: bool) void {
-    return impl_SendWorldWeather(pid, for_everyone, skip_attached_player);
-}
-pub fn sendWorldCollisionOverride(
-    pid: c_ushort,
-    for_everyone: bool,
-    skip_attached_player: bool,
-) void {
-    return impl_SendWorldCollisionOverride(pid, for_everyone, skip_attached_player);
-}
-pub fn sendCellReset(pid: c_ushort, for_everyone: bool) void {
-    return impl_SendCellReset(pid, for_everyone);
-}
-pub fn sendWorldDestinationOverride(
-    pid: c_ushort,
-    for_everyone: bool,
-    skip_attached_player: bool,
-) void {
-    return impl_SendWorldDestinationOverride(pid, for_everyone, skip_attached_player);
+pub fn loadMapTileImageFile(cell_x: i32, cell_y: i32, file_path: [:0]const u8) void {
+    return raw.loadMapTileImageFile(cell_x, cell_y, file_path);
 }
 
-extern "libTES3MP-core" fn impl_ReadReceivedWorldstate() callconv(.C) void;
+pub fn sendClientScriptGlobal(pid: u16, send_to_other_players: bool, skip_attached_player: bool) void {
+    return raw.sendClientScriptGlobal(pid, send_to_other_players, skip_attached_player);
+}
+pub fn sendClientScriptSettings(pid: u16, send_to_other_players: bool, skip_attached_player: bool) void {
+    return raw.sendClientScriptSettings(pid, send_to_other_players, skip_attached_player);
+}
+pub fn sendWorldKillCount(pid: u16, send_to_other_players: bool, skip_attached_player: bool) void {
+    return raw.sendWorldKillCount(pid, send_to_other_players, skip_attached_player);
+}
+pub fn sendWorldMap(pid: u16, send_to_other_players: bool, skip_attached_player: bool) void {
+    return raw.sendWorldMap(pid, send_to_other_players, skip_attached_player);
+}
+pub fn sendWorldTime(pid: u16, send_to_other_players: bool, skip_attached_player: bool) void {
+    return raw.sendWorldTime(pid, send_to_other_players, skip_attached_player);
+}
+pub fn sendWorldWeather(pid: u16, send_to_other_players: bool, skip_attached_player: bool) void {
+    return raw.sendWorldWeather(pid, send_to_other_players, skip_attached_player);
+}
+pub fn sendWorldCollisionOverride(pid: u16, send_to_other_players: bool, skip_attached_player: bool) void {
+    return raw.sendWorldCollisionOverride(pid, send_to_other_players, skip_attached_player);
+}
+pub fn sendCellReset(pid: u16, send_to_other_players: bool) void {
+    return raw.sendCellReset(pid, send_to_other_players);
+}
+pub fn sendWorldDestinationOverride(pid: u16, send_to_other_players: bool, skip_attached_player: bool) void {
+    return raw.sendWorldDestinationOverride(pid, send_to_other_players, skip_attached_player);
+}
+pub fn sendWorldRegionAuthority(pid: u16) void {
+    return raw.sendWorldRegionAuthority(pid);
+}
 
-extern "libTES3MP-core" fn impl_CopyReceivedWorldstateToStore() callconv(.C) void;
+pub const raw = struct {
+    extern "libTES3MP-core" fn libtes3mp_ReadReceivedWorldstate() callconv(.C) void;
+    pub const readReceivedWorldstate = libtes3mp_ReadReceivedWorldstate;
 
-extern "libTES3MP-core" fn impl_ClearKillChanges() callconv(.C) void;
-extern "libTES3MP-core" fn impl_ClearMapChanges() callconv(.C) void;
-extern "libTES3MP-core" fn impl_ClearClientGlobals() callconv(.C) void;
+    extern "libTES3MP-core" fn libtes3mp_CopyReceivedWorldstateToStore() callconv(.C) void;
+    pub const copyReceivedWorldstateToStore = libtes3mp_CopyReceivedWorldstateToStore;
 
-extern "libTES3MP-core" fn impl_GetKillChangesSize() callconv(.C) c_uint;
-extern "libTES3MP-core" fn impl_GetMapChangesSize() callconv(.C) c_uint;
-extern "libTES3MP-core" fn impl_GetClientGlobalsSize() callconv(.C) c_uint;
+    extern "libTES3MP-core" fn libtes3mp_ClearKillChanges() callconv(.C) void;
+    pub const clearKillChanges = libtes3mp_ClearKillChanges;
+    extern "libTES3MP-core" fn libtes3mp_ClearMapChanges() callconv(.C) void;
+    pub const clearMapChanges = libtes3mp_ClearMapChanges;
+    extern "libTES3MP-core" fn libtes3mp_ClearClientGlobals() callconv(.C) void;
+    pub const clearClientGlobals = libtes3mp_ClearClientGlobals;
 
-extern "libTES3MP-core" fn impl_GetKillRefId(c_uint) callconv(.C) ?[*:0]const u8;
-extern "libTES3MP-core" fn impl_GetKillNumber(c_uint) callconv(.C) c_uint;
+    extern "libTES3MP-core" fn libtes3mp_GetKillChangesSize() callconv(.C) c_uint;
+    pub const getKillChangesSize = libtes3mp_GetKillChangesSize;
+    extern "libTES3MP-core" fn libtes3mp_GetMapChangesSize() callconv(.C) c_uint;
+    pub const getMapChangesSize = libtes3mp_GetMapChangesSize;
+    extern "libTES3MP-core" fn libtes3mp_GetClientGlobalsSize() callconv(.C) c_uint;
+    pub const getClientGlobalsSize = libtes3mp_GetClientGlobalsSize;
 
-extern "libTES3MP-core" fn impl_GetWeatherRegion() callconv(.C) ?[*:0]const u8;
-extern "libTES3MP-core" fn impl_GetWeatherCurrent() callconv(.C) c_int;
-extern "libTES3MP-core" fn impl_GetWeatherNext() callconv(.C) c_int;
-extern "libTES3MP-core" fn impl_GetWeatherQueued() callconv(.C) c_int;
-extern "libTES3MP-core" fn impl_GetWeatherTransitionFactor() callconv(.C) f64;
+    extern "libTES3MP-core" fn libtes3mp_GetKillRefId(index: c_uint) callconv(.C) ?[*:0]const u8;
+    pub const getKillRefId = libtes3mp_GetKillRefId;
+    extern "libTES3MP-core" fn libtes3mp_GetKillNumber(index: c_uint) callconv(.C) c_int;
+    pub const getKillNumber = libtes3mp_GetKillNumber;
 
-extern "libTES3MP-core" fn impl_GetMapTileCellX(c_uint) callconv(.C) c_int;
-extern "libTES3MP-core" fn impl_GetMapTileCellY(c_uint) callconv(.C) c_int;
+    extern "libTES3MP-core" fn libtes3mp_GetWeatherRegion() callconv(.C) ?[*:0]const u8;
+    pub const getWeatherRegion = libtes3mp_GetWeatherRegion;
+    extern "libTES3MP-core" fn libtes3mp_GetWeatherCurrent() callconv(.C) c_int;
+    pub const getWeatherCurrent = libtes3mp_GetWeatherCurrent;
+    extern "libTES3MP-core" fn libtes3mp_GetWeatherNext() callconv(.C) c_int;
+    pub const getWeatherNext = libtes3mp_GetWeatherNext;
+    extern "libTES3MP-core" fn libtes3mp_GetWeatherQueued() callconv(.C) c_int;
+    pub const getWeatherQueued = libtes3mp_GetWeatherQueued;
+    extern "libTES3MP-core" fn libtes3mp_GetWeatherTransitionFactor() callconv(.C) f64;
+    pub const getWeatherTransitionFactor = libtes3mp_GetWeatherTransitionFactor;
 
-extern "libTES3MP-core" fn impl_GetClientGlobalId(c_uint) callconv(.C) ?[*:0]const u8;
-extern "libTES3MP-core" fn impl_GetClientGlobalVariableType(c_uint) callconv(.C) c_ushort;
-extern "libTES3MP-core" fn impl_GetClientGlobalIntValue(c_uint) callconv(.C) c_int;
-extern "libTES3MP-core" fn impl_GetClientGlobalFloatValue(c_uint) callconv(.C) f64;
+    extern "libTES3MP-core" fn libtes3mp_GetMapTileCellX(index: c_uint) callconv(.C) c_int;
+    pub const getMapTileCellX = libtes3mp_GetMapTileCellX;
+    extern "libTES3MP-core" fn libtes3mp_GetMapTileCellY(index: c_uint) callconv(.C) c_int;
+    pub const getMapTileCellY = libtes3mp_GetMapTileCellY;
 
-extern "libTES3MP-core" fn impl_SetAuthorityRegion([*:0]const u8) callconv(.C) void;
+    extern "libTES3MP-core" fn libtes3mp_GetClientGlobalId(index: c_uint) callconv(.C) ?[*:0]const u8;
+    pub const getClientGlobalId = libtes3mp_GetClientGlobalId;
+    extern "libTES3MP-core" fn libtes3mp_GetClientGlobalVariableType(index: c_uint) callconv(.C) c_ushort;
+    pub const getClientGlobalVariableType = libtes3mp_GetClientGlobalVariableType;
+    extern "libTES3MP-core" fn libtes3mp_GetClientGlobalIntValue(index: c_uint) callconv(.C) c_int;
+    pub const getClientGlobalIntValue = libtes3mp_GetClientGlobalIntValue;
+    extern "libTES3MP-core" fn libtes3mp_GetClientGlobalFloatValue(index: c_uint) callconv(.C) f64;
+    pub const getClientGlobalFloatValue = libtes3mp_GetClientGlobalFloatValue;
 
-extern "libTES3MP-core" fn impl_SetWeatherRegion([*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetWeatherForceState(bool) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetWeatherCurrent(c_int) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetWeatherNext(c_int) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetWeatherQueued(c_int) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetWeatherTransitionFactor(f64) callconv(.C) void;
+    extern "libTES3MP-core" fn libtes3mp_SetAuthorityRegion(authority_region: [*:0]const u8) callconv(.C) void;
+    pub const setAuthorityRegion = libtes3mp_SetAuthorityRegion;
 
-extern "libTES3MP-core" fn impl_SetHour(f64) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetDay(c_int) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetMonth(c_int) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetYear(c_int) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetDaysPassed(c_int) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetTimeScale(f64) callconv(.C) void;
+    extern "libTES3MP-core" fn libtes3mp_SetWeatherRegion(region: [*:0]const u8) callconv(.C) void;
+    pub const setWeatherRegion = libtes3mp_SetWeatherRegion;
+    extern "libTES3MP-core" fn libtes3mp_SetWeatherForceState(force_state: bool) callconv(.C) void;
+    pub const setWeatherForceState = libtes3mp_SetWeatherForceState;
+    extern "libTES3MP-core" fn libtes3mp_SetWeatherCurrent(current_weather: c_int) callconv(.C) void;
+    pub const setWeatherCurrent = libtes3mp_SetWeatherCurrent;
+    extern "libTES3MP-core" fn libtes3mp_SetWeatherNext(next_weather: c_int) callconv(.C) void;
+    pub const setWeatherNext = libtes3mp_SetWeatherNext;
+    extern "libTES3MP-core" fn libtes3mp_SetWeatherQueued(queued_weather: c_int) callconv(.C) void;
+    pub const setWeatherQueued = libtes3mp_SetWeatherQueued;
+    extern "libTES3MP-core" fn libtes3mp_SetWeatherTransitionFactor(transition_factor: f64) callconv(.C) void;
+    pub const setWeatherTransitionFactor = libtes3mp_SetWeatherTransitionFactor;
 
-extern "libTES3MP-core" fn impl_SetPlayerCollisionState(bool) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetActorCollisionState(bool) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SetPlacedObjectCollisionState(bool) callconv(.C) void;
-extern "libTES3MP-core" fn impl_UseActorCollisionForPlacedObjects(bool) callconv(.C) void;
+    extern "libTES3MP-core" fn libtes3mp_SetHour(hour: f64) callconv(.C) void;
+    pub const setHour = libtes3mp_SetHour;
+    extern "libTES3MP-core" fn libtes3mp_SetDay(day: c_int) callconv(.C) void;
+    pub const setDay = libtes3mp_SetDay;
+    extern "libTES3MP-core" fn libtes3mp_SetMonth(month: c_int) callconv(.C) void;
+    pub const setMonth = libtes3mp_SetMonth;
+    extern "libTES3MP-core" fn libtes3mp_SetYear(year: c_int) callconv(.C) void;
+    pub const setYear = libtes3mp_SetYear;
+    extern "libTES3MP-core" fn libtes3mp_SetDaysPassed(days_passed: c_int) callconv(.C) void;
+    pub const setDaysPassed = libtes3mp_SetDaysPassed;
+    extern "libTES3MP-core" fn libtes3mp_SetTimeScale(time_scale: f64) callconv(.C) void;
+    pub const setTimeScale = libtes3mp_SetTimeScale;
 
-extern "libTES3MP-core" fn impl_AddKill([*:0]const u8, c_int) callconv(.C) void;
-extern "libTES3MP-core" fn impl_AddClientGlobalInteger([*:0]const u8, c_int, c_uint) callconv(.C) void;
-extern "libTES3MP-core" fn impl_AddClientGlobalFloat([*:0]const u8, f64) callconv(.C) void;
-extern "libTES3MP-core" fn impl_AddSynchronizedClientScriptId([*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_AddSynchronizedClientGlobalId([*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_AddEnforcedCollisionRefId([*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_AddCellToReset([*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_AddDestinationOverride([*:0]const u8, [*:0]const u8) callconv(.C) void;
+    extern "libTES3MP-core" fn libtes3mp_SetPlayerCollisionState(state: bool) callconv(.C) void;
+    pub const setPlayerCollisionState = libtes3mp_SetPlayerCollisionState;
+    extern "libTES3MP-core" fn libtes3mp_SetActorCollisionState(state: bool) callconv(.C) void;
+    pub const setActorCollisionState = libtes3mp_SetActorCollisionState;
+    extern "libTES3MP-core" fn libtes3mp_SetPlacedObjectCollisionState(state: bool) callconv(.C) void;
+    pub const setPlacedObjectCollisionState = libtes3mp_SetPlacedObjectCollisionState;
+    extern "libTES3MP-core" fn libtes3mp_UseActorCollisionForPlacedObjects(use_actor_collision: bool) callconv(.C) void;
+    pub const useActorCollisionForPlacedObjects = libtes3mp_UseActorCollisionForPlacedObjects;
 
-extern "libTES3MP-core" fn impl_ClearSynchronizedClientScriptIds() callconv(.C) void;
-extern "libTES3MP-core" fn impl_ClearSynchronizedClientGlobalIds() callconv(.C) void;
-extern "libTES3MP-core" fn impl_ClearEnforcedCollisionRefIds() callconv(.C) void;
-extern "libTES3MP-core" fn impl_ClearCellsToReset() callconv(.C) void;
-extern "libTES3MP-core" fn impl_ClearDestinationOverrides() callconv(.C) void;
+    extern "libTES3MP-core" fn libtes3mp_AddKill(ref_id: [*:0]const u8, number: c_int) callconv(.C) void;
+    pub const addKill = libtes3mp_AddKill;
+    extern "libTES3MP-core" fn libtes3mp_AddClientGlobalInteger(id: [*:0]const u8, int_value: c_int, variable_type: c_uint) callconv(.C) void;
+    pub const addClientGlobalInteger = libtes3mp_AddClientGlobalInteger;
+    extern "libTES3MP-core" fn libtes3mp_AddClientGlobalFloat(id: [*:0]const u8, float_value: f64) callconv(.C) void;
+    pub const addClientGlobalFloat = libtes3mp_AddClientGlobalFloat;
+    extern "libTES3MP-core" fn libtes3mp_AddSynchronizedClientScriptId(script_id: [*:0]const u8) callconv(.C) void;
+    pub const addSynchronizedClientScriptId = libtes3mp_AddSynchronizedClientScriptId;
+    extern "libTES3MP-core" fn libtes3mp_AddSynchronizedClientGlobalId(global_id: [*:0]const u8) callconv(.C) void;
+    pub const addSynchronizedClientGlobalId = libtes3mp_AddSynchronizedClientGlobalId;
+    extern "libTES3MP-core" fn libtes3mp_AddEnforcedCollisionRefId(ref_id: [*:0]const u8) callconv(.C) void;
+    pub const addEnforcedCollisionRefId = libtes3mp_AddEnforcedCollisionRefId;
+    extern "libTES3MP-core" fn libtes3mp_AddCellToReset(cell_description: [*:0]const u8) callconv(.C) void;
+    pub const addCellToReset = libtes3mp_AddCellToReset;
+    extern "libTES3MP-core" fn libtes3mp_AddDestinationOverride(old_cell_description: [*:0]const u8, new_cell_description: [*:0]const u8) callconv(.C) void;
+    pub const addDestinationOverride = libtes3mp_AddDestinationOverride;
 
-extern "libTES3MP-core" fn impl_SaveMapTileImageFile(c_uint, [*:0]const u8) callconv(.C) void;
-extern "libTES3MP-core" fn impl_LoadMapTileImageFile(c_int, c_int, [*:0]const u8) callconv(.C) void;
+    extern "libTES3MP-core" fn libtes3mp_ClearSynchronizedClientScriptIds() callconv(.C) void;
+    pub const clearSynchronizedClientScriptIds = libtes3mp_ClearSynchronizedClientScriptIds;
+    extern "libTES3MP-core" fn libtes3mp_ClearSynchronizedClientGlobalIds() callconv(.C) void;
+    pub const clearSynchronizedClientGlobalIds = libtes3mp_ClearSynchronizedClientGlobalIds;
+    extern "libTES3MP-core" fn libtes3mp_ClearEnforcedCollisionRefIds() callconv(.C) void;
+    pub const clearEnforcedCollisionRefIds = libtes3mp_ClearEnforcedCollisionRefIds;
+    extern "libTES3MP-core" fn libtes3mp_ClearCellsToReset() callconv(.C) void;
+    pub const clearCellsToReset = libtes3mp_ClearCellsToReset;
+    extern "libTES3MP-core" fn libtes3mp_ClearDestinationOverrides() callconv(.C) void;
+    pub const clearDestinationOverrides = libtes3mp_ClearDestinationOverrides;
 
-extern "libTES3MP-core" fn impl_SendClientScriptGlobal(c_ushort, bool, bool) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SendClientScriptSettings(c_ushort, bool, bool) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SendWorldKillCount(c_ushort, bool, bool) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SendWorldRegionAuthority(c_ushort) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SendWorldMap(c_ushort, bool, bool) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SendWorldTime(c_ushort, bool, bool) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SendWorldWeather(c_ushort, bool, bool) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SendWorldCollisionOverride(c_ushort, bool, bool) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SendCellReset(c_ushort, bool) callconv(.C) void;
-extern "libTES3MP-core" fn impl_SendWorldDestinationOverride(c_ushort, bool, bool) callconv(.C) void;
+    extern "libTES3MP-core" fn libtes3mp_SaveMapTileImageFile(index: c_uint, file_path: [*:0]const u8) callconv(.C) void;
+    pub const saveMapTileImageFile = libtes3mp_SaveMapTileImageFile;
+    extern "libTES3MP-core" fn libtes3mp_LoadMapTileImageFile(cell_x: c_int, cell_y: c_int, file_path: [*:0]const u8) callconv(.C) void;
+    pub const loadMapTileImageFile = libtes3mp_LoadMapTileImageFile;
+
+    extern "libTES3MP-core" fn libtes3mp_SendClientScriptGlobal(pid: c_ushort, send_to_other_players: bool, skip_attached_player: bool) callconv(.C) void;
+    pub const sendClientScriptGlobal = libtes3mp_SendClientScriptGlobal;
+    extern "libTES3MP-core" fn libtes3mp_SendClientScriptSettings(pid: c_ushort, send_to_other_players: bool, skip_attached_player: bool) callconv(.C) void;
+    pub const sendClientScriptSettings = libtes3mp_SendClientScriptSettings;
+    extern "libTES3MP-core" fn libtes3mp_SendWorldKillCount(pid: c_ushort, send_to_other_players: bool, skip_attached_player: bool) callconv(.C) void;
+    pub const sendWorldKillCount = libtes3mp_SendWorldKillCount;
+    extern "libTES3MP-core" fn libtes3mp_SendWorldMap(pid: c_ushort, send_to_other_players: bool, skip_attached_player: bool) callconv(.C) void;
+    pub const sendWorldMap = libtes3mp_SendWorldMap;
+    extern "libTES3MP-core" fn libtes3mp_SendWorldTime(pid: c_ushort, send_to_other_players: bool, skip_attached_player: bool) callconv(.C) void;
+    pub const sendWorldTime = libtes3mp_SendWorldTime;
+    extern "libTES3MP-core" fn libtes3mp_SendWorldWeather(pid: c_ushort, send_to_other_players: bool, skip_attached_player: bool) callconv(.C) void;
+    pub const sendWorldWeather = libtes3mp_SendWorldWeather;
+    extern "libTES3MP-core" fn libtes3mp_SendWorldCollisionOverride(pid: c_ushort, send_to_other_players: bool, skip_attached_player: bool) callconv(.C) void;
+    pub const sendWorldCollisionOverride = libtes3mp_SendWorldCollisionOverride;
+    extern "libTES3MP-core" fn libtes3mp_SendCellReset(pid: c_ushort, send_to_other_players: bool) callconv(.C) void;
+    pub const sendCellReset = libtes3mp_SendCellReset;
+    extern "libTES3MP-core" fn libtes3mp_SendWorldDestinationOverride(pid: c_ushort, send_to_other_players: bool, skip_attached_player: bool) callconv(.C) void;
+    pub const sendWorldDestinationOverride = libtes3mp_SendWorldDestinationOverride;
+    extern "libTES3MP-core" fn libtes3mp_SendWorldRegionAuthority(pid: c_ushort) callconv(.C) void;
+    pub const sendWorldRegionAuthority = libtes3mp_SendWorldRegionAuthority;
+};
