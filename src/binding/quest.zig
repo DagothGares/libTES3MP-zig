@@ -71,7 +71,7 @@ pub fn getJournalItemActorRefId(pid: u16, index: u32) [:0]const u8 {
     return std.mem.span(raw.getJournalItemActorRefId(pid, index).?);
 }
 
-pub fn getReputation(pid: u32) i32 {
+pub fn getReputation(pid: u16) i32 {
     return raw.getReputation(pid);
 }
 

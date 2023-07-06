@@ -9,7 +9,7 @@ pub fn isWerewolf(pid: u16) bool {
     return raw.isWerewolf(pid);
 }
 pub fn getCreatureRefId(pid: u16) [:0]const u8 {
-    return raw.getCreatureRefId(pid);
+    return std.mem.span(raw.getCreatureRefId(pid).?);
 }
 pub fn getCreatureNameDisplayState(pid: u16) bool {
     return raw.getCreatureNameDisplayState(pid);

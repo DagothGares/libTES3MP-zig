@@ -21,7 +21,7 @@ pub fn getCellStateDescription(pid: u16, index: u32) [:0]const u8 {
     return std.mem.span(raw.getCellStateDescription(pid, index).?);
 }
 pub fn getCell(pid: u16) [:0]const u8 {
-    return raw.getCell(pid);
+    return std.mem.span(raw.getCell(pid).?);
 }
 pub fn getExteriorX(pid: u16) c_int {
     return raw.getExteriorX(pid);

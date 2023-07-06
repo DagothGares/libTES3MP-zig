@@ -66,7 +66,7 @@ pub fn copyReceivedObjectListToStore() void {
 }
 
 pub fn getObjectListSize() u32 {
-    return raw.getObjectLIstSize();
+    return raw.getObjectListSize();
 }
 pub fn getObjectListOrigin() ObjectListOrigin {
     return @enumFromInt(raw.getObjectListOrigin());
@@ -237,7 +237,7 @@ pub fn getObjectActivatingName(index: u32) [:0]const u8 {
     shared.triggerSafetyCheck(getObjectListSize(), index);
     std.debug.assert(!raw.doesObjectHavePlayerActivating(index));
 
-    return raw.getObjectActivatingName(index);
+    return std.mem.span(raw.getObjectActivatingName(index).?);
 }
 
 pub fn getObjectHitSuccess(index: u32) bool {
@@ -401,20 +401,24 @@ pub fn getClientLocalInternalIndex(object_index: u32, variable_index: u32) u32 {
     shared.triggerSafetyCheck(getObjectListSize(), object_index);
     shared.triggerSafetyCheck(raw.getClientLocalsSize(object_index), variable_index);
 
-    return raw.getClientLocalsInternalIndex(object_index, variable_index);
+    return raw.getClientLocalInternalIndex(object_index, variable_index);
 }
 pub fn getClientLocalValue(object_index: u32, variable_index: u32) union(enum) {
     short: i16,
     long: i32,
-    float: f32,
+    float: f64,
 } {
     shared.triggerSafetyCheck(getObjectListSize(), object_index);
     shared.triggerSafetyCheck(raw.getClientLocalsSize(object_index), variable_index);
 
-    return switch (@as(VariableType, @enumFromInt(raw.getClientLocalVariableType))) {
+    return switch (@as(
+        VariableType,
+        @enumFromInt(raw.getClientLocalVariableType(object_index, variable_index)),
+    )) {
         .short => .{ .short = @intCast(raw.getClientLocalIntValue(object_index, variable_index)) },
         .long => .{ .long = @intCast(raw.getClientLocalIntValue(object_index, variable_index)) },
-        .float => .{ .float = @intCast(raw.getClientFloatValue(object_index, variable_index)) },
+        .float => .{ .float = raw.getClientLocalFloatValue(object_index, variable_index) },
+        else => unreachable,
     };
 }
 
@@ -521,7 +525,8 @@ pub fn setObjectDialogueChoiceType(dialogue_choice_type: DialogueChoice) void {
     return raw.setObjectDialogueChoiceType(@intFromEnum(dialogue_choice_type));
 }
 pub fn setObjectDialogueChoiceTopic(topic: [:0]const u8) void {
-    raw.setObjectDialogueChoiceType(.topic);
+    raw.setObjectDialogueChoiceType(@intFromEnum(DialogueChoice.topic));
+
     return raw.setObjectDialogueChoiceTopic(topic);
 }
 pub fn setObjectGoldPool(gold_pool: u32) void {
@@ -567,7 +572,7 @@ pub fn setObjectSummonerPid(pid: u16) void {
 pub fn setObjectSummonerRefNum(ref_num: i32) void {
     return raw.setObjectSummonerRefNum(ref_num);
 }
-pub fn setObjectSummonerMpNum(mp_num: u32) void {
+pub fn setObjectSummonerMpNum(mp_num: i32) void {
     return raw.setObjectSummonerMpNum(mp_num);
 }
 

@@ -1,8 +1,5 @@
 const std = @import("std");
 
-// This module is not intended to be built directly, except for testing purposes.
-// You should include it in your program as a module instead. See the example/ folder.
-
 inline fn thisDir() []const u8 {
     return comptime std.fs.path.dirname(@src().file) orelse ".";
 }
@@ -21,9 +18,13 @@ pub fn build(b: *std.Build) void {
         .ReleaseFast, .ReleaseSmall => libTES3MP.strip = true,
         else => {},
     }
+    libTES3MP.override_dest_dir = .{
+        .custom = "deps",
+    };
+    b.installArtifact(libTES3MP);
 
-    const lib = b.addStaticLibrary(.{
-        .name = "libTES3MP-zig",
+    const lib = b.addSharedLibrary(.{
+        .name = "libTES3MP-zig-example",
         .root_source_file = .{ .path = "src/main.zig" },
         .target = target,
         .optimize = optimize,
@@ -32,19 +33,12 @@ pub fn build(b: *std.Build) void {
         .ReleaseFast, .ReleaseSmall => lib.strip = true,
         else => {},
     }
-    //lib.linkLibrary(libTES3MP);
+    lib.addLibraryPath(thisDir() ++ "/zig-out/deps");
+    lib.linkSystemLibrary("libTES3MP-core");
+    lib.addModule(
+        "libTES3MP-zig",
+        b.createModule(.{ .source_file = .{ .path = "../src/main.zig" } }),
+    );
+
     b.installArtifact(lib);
-
-    // I dunno how to get Zig to compile libTES3MP-core for tests, nevermind actually link it
-    // properly.
-    const main_tests = b.addTest(.{
-        .root_source_file = .{ .path = "src/main.zig" },
-        .target = target,
-        .optimize = optimize,
-    });
-    main_tests.linkLibrary(libTES3MP);
-
-    const run_main_tests = b.addRunArtifact(main_tests);
-    const test_step = b.step("test", "Run library tests");
-    test_step.dependOn(&run_main_tests.step);
 }

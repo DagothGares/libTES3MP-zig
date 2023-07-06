@@ -1,4 +1,167 @@
 //! A wrapper around the bindings to libTES3MP-core.
+pub const actor = @import("binding/actor.zig");
 pub const book = @import("binding/book.zig");
+pub const cell = @import("binding/cell.zig");
+pub const chat = @import("binding/chat.zig");
 pub const class = @import("binding/class.zig");
+pub const dialogue = @import("binding/dialogue.zig");
+pub const faction = @import("binding/faction.zig");
+pub const gui = @import("binding/gui.zig");
+pub const item = @import("binding/item.zig");
+pub const mechanic = @import("binding/mechanic.zig");
+pub const object = @import("binding/object.zig");
+pub const position = @import("binding/position.zig");
+pub const quest = @import("binding/quest.zig");
+pub const record_dynamic = @import("binding/record_dynamic.zig");
+pub const server = @import("binding/server.zig");
+pub const setting = @import("binding/setting.zig");
+pub const shapeshift = @import("binding/shapeshift.zig");
+pub const spell = @import("binding/spell.zig");
+pub const stat = @import("binding/stat.zig");
+pub const timer = @import("binding/timer.zig");
 pub const worldstate = @import("binding/worldstate.zig");
+
+pub const Status = enum(u8) {
+    none = 0,
+    default = 1,
+    custom = 2,
+    all = 3,
+};
+
+extern "libTES3MP-core" fn libtes3mp_bind_OnServerInit(*const fn () callconv(.C) Status) callconv(.C) void;
+pub const bind_OnServerInit = libtes3mp_bind_OnServerInit;
+extern "libTES3MP-core" fn libtes3mp_bind_OnServerPostInit(*const fn () callconv(.C) Status) callconv(.C) void;
+pub const bind_OnServerPostInit = libtes3mp_bind_OnServerPostInit;
+extern "libTES3MP-core" fn libtes3mp_bind_OnServerExit(*const fn (bool) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnServerExit = libtes3mp_bind_OnServerExit;
+
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerConnect(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerConnect = libtes3mp_bind_OnPlayerConnect;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerDisconnect(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerDisconnect = libtes3mp_bind_OnPlayerDisconnect;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerDeath(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerDeath = libtes3mp_bind_OnPlayerDeath;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerResurrect(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerResurrect = libtes3mp_bind_OnPlayerResurrect;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerCellChange(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerCellChange = libtes3mp_bind_OnPlayerCellChange;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerAttribute(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerAttribute = libtes3mp_bind_OnPlayerAttribute;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerSkill(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerSkill = libtes3mp_bind_OnPlayerSkill;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerLevel(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerLevel = libtes3mp_bind_OnPlayerLevel;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerBounty(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerBounty = libtes3mp_bind_OnPlayerBounty;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerReputation(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerReputation = libtes3mp_bind_OnPlayerReputation;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerEquipment(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerEquipment = libtes3mp_bind_OnPlayerEquipment;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerInventory(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerInventory = libtes3mp_bind_OnPlayerInventory;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerJournal(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerJournal = libtes3mp_bind_OnPlayerJournal;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerFaction(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerFaction = libtes3mp_bind_OnPlayerFaction;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerShapeShift(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerShapeShift = libtes3mp_bind_OnPlayerShapeShift;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerSpellbook(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerSpellbook = libtes3mp_bind_OnPlayerSpellbook;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerSpellsActive(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerSpellsActive = libtes3mp_bind_OnPlayerSpellsActive;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerCooldowns(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerCooldowns = libtes3mp_bind_OnPlayerCooldowns;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerQuickKeys(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerQuickKeys = libtes3mp_bind_OnPlayerQuickKeys;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerTopic(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerTopic = libtes3mp_bind_OnPlayerTopic;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerDisposition(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerDisposition = libtes3mp_bind_OnPlayerDisposition;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerBook(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerBook = libtes3mp_bind_OnPlayerBook;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerItemUse(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerItemUse = libtes3mp_bind_OnPlayerItemUse;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerMiscellaneous(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerMiscellaneous = libtes3mp_bind_OnPlayerMiscellaneous;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerInput(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerInput = libtes3mp_bind_OnPlayerInput;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerRest(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerRest = libtes3mp_bind_OnPlayerRest;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerSendMessage(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerSendMessage = libtes3mp_bind_OnPlayerSendMessage;
+extern "libTES3MP-core" fn libtes3mp_bind_OnPlayerEndCharGen(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnPlayerEndCharGen = libtes3mp_bind_OnPlayerEndCharGen;
+
+extern "libTES3MP-core" fn libtes3mp_bind_OnCellLoad(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnCellLoad = libtes3mp_bind_OnCellLoad;
+extern "libTES3MP-core" fn libtes3mp_bind_OnCellUnload(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnCellUnload = libtes3mp_bind_OnCellUnload;
+extern "libTES3MP-core" fn libtes3mp_bind_OnCellDeletion(*const fn ([*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnCellDeletion = libtes3mp_bind_OnCellDeletion;
+
+extern "libTES3MP-core" fn libtes3mp_bind_OnRecordDynamic(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnRecordDynamic = libtes3mp_bind_OnRecordDynamic;
+extern "libTES3MP-core" fn libtes3mp_bind_OnConsoleCommand(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnConsoleCommand = libtes3mp_bind_OnConsoleCommand;
+extern "libTES3MP-core" fn libtes3mp_bind_OnContainer(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnContainer = libtes3mp_bind_OnContainer;
+extern "libTES3MP-core" fn libtes3mp_bind_OnDoorState(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnDoorState = libtes3mp_bind_OnDoorState;
+extern "libTES3MP-core" fn libtes3mp_bind_OnVideoPlay(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnVideoPlay = libtes3mp_bind_OnVideoPlay;
+extern "libTES3MP-core" fn libtes3mp_bind_OnGUIAction(*const fn (c_ushort, c_int, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnGUIAction = libtes3mp_bind_OnGUIAction;
+extern "libTES3MP-core" fn libtes3mp_bind_OnMpNumIncrement(*const fn (c_int) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnMpNumIncrement = libtes3mp_bind_OnMpNumIncrement;
+extern "libTES3MP-core" fn libtes3mp_bind_OnRequestDataFileListEvent(*const fn () callconv(.C) Status) callconv(.C) void;
+pub const bind_OnRequestDataFileListEvent = libtes3mp_bind_OnRequestDataFileListEvent;
+
+extern "libTES3MP-core" fn libtes3mp_bind_OnObjectActivate(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnObjectActivate = libtes3mp_bind_OnObjectActivate;
+extern "libTES3MP-core" fn libtes3mp_bind_OnObjectHit(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnObjectHit = libtes3mp_bind_OnObjectHit;
+extern "libTES3MP-core" fn libtes3mp_bind_OnObjectPlace(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnObjectPlace = libtes3mp_bind_OnObjectPlace;
+extern "libTES3MP-core" fn libtes3mp_bind_OnObjectSpawn(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnObjectSpawn = libtes3mp_bind_OnObjectSpawn;
+extern "libTES3MP-core" fn libtes3mp_bind_OnObjectDelete(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnObjectDelete = libtes3mp_bind_OnObjectDelete;
+extern "libTES3MP-core" fn libtes3mp_bind_OnObjectLock(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnObjectLock = libtes3mp_bind_OnObjectLock;
+extern "libTES3MP-core" fn libtes3mp_bind_OnObjectDialogueChoice(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnObjectDialogueChoice = libtes3mp_bind_OnObjectDialogueChoice;
+extern "libTES3MP-core" fn libtes3mp_bind_OnObjectMiscellaneous(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnObjectMiscellaneous = libtes3mp_bind_OnObjectMiscellaneous;
+extern "libTES3MP-core" fn libtes3mp_bind_OnObjectRestock(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnObjectRestock = libtes3mp_bind_OnObjectRestock;
+extern "libTES3MP-core" fn libtes3mp_bind_OnObjectScale(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnObjectScale = libtes3mp_bind_OnObjectScale;
+extern "libTES3MP-core" fn libtes3mp_bind_OnObjectSound(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnObjectSound = libtes3mp_bind_OnObjectSound;
+extern "libTES3MP-core" fn libtes3mp_bind_OnObjectTrap(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnObjectTrap = libtes3mp_bind_OnObjectTrap;
+
+extern "libTES3MP-core" fn libtes3mp_bind_OnActorList(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnActorList = libtes3mp_bind_OnActorList;
+extern "libTES3MP-core" fn libtes3mp_bind_OnActorAI(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnActorAI = libtes3mp_bind_OnActorAI;
+extern "libTES3MP-core" fn libtes3mp_bind_OnActorDeath(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnActorDeath = libtes3mp_bind_OnActorDeath;
+extern "libTES3MP-core" fn libtes3mp_bind_OnActorSpellsActive(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnActorSpellsActive = libtes3mp_bind_OnActorSpellsActive;
+extern "libTES3MP-core" fn libtes3mp_bind_OnActorCellChange(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnActorCellChange = libtes3mp_bind_OnActorCellChange;
+extern "libTES3MP-core" fn libtes3mp_bind_OnActorTest(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnActorTest = libtes3mp_bind_OnActorTest;
+
+extern "libTES3MP-core" fn libtes3mp_bind_OnWorldKillCount(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnWorldKillCount = libtes3mp_bind_OnWorldKillCount;
+extern "libTES3MP-core" fn libtes3mp_bind_OnWorldMap(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnWorldMap = libtes3mp_bind_OnWorldMap;
+extern "libTES3MP-core" fn libtes3mp_bind_OnWorldWeather(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnWorldWeather = libtes3mp_bind_OnWorldWeather;
+
+extern "libTES3MP-core" fn libtes3mp_bind_OnClientScriptLocal(*const fn (c_ushort, [*:0]const u8) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnClientScriptLocal = libtes3mp_bind_OnClientScriptLocal;
+extern "libTES3MP-core" fn libtes3mp_bind_OnClientScriptGlobal(*const fn (c_ushort) callconv(.C) Status) callconv(.C) void;
+pub const bind_OnClientScriptGlobal = libtes3mp_bind_OnClientScriptGlobal;

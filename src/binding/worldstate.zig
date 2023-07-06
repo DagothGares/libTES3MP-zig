@@ -48,7 +48,7 @@ pub fn getClientGlobalsSize() u32 {
 pub fn getKillRefId(index: u32) [:0]const u8 {
     shared.triggerSafetyCheck(getKillChangesSize(), index);
 
-    return std.mem.span(raw.getKillRefId().?);
+    return std.mem.span(raw.getKillRefId(index).?);
 }
 pub fn getKillNumber(index: u32) i32 {
     shared.triggerSafetyCheck(getKillChangesSize(), index);
@@ -86,17 +86,18 @@ pub fn getMapTileCellY(index: u32) i32 {
 pub fn getClientGlobalId(index: u32) [:0]const u8 {
     shared.triggerSafetyCheck(getClientGlobalsSize(), index);
 
-    return std.mem.span(raw.getClientGlobalId().?);
+    return std.mem.span(raw.getClientGlobalId(index).?);
 }
 pub fn getClientGlobalVariableType(index: u32) VariableType {
     shared.triggerSafetyCheck(getClientGlobalsSize(), index);
 
-    return raw.getClientGlobalVariableType(index);
+    return @enumFromInt(raw.getClientGlobalVariableType(index));
 }
 pub fn getClientGlobal(index: u32) union(enum) { int: i32, float: f64 } {
     return switch (getClientGlobalVariableType(index)) {
         .short, .long => .{ .int = raw.getClientGlobalIntValue(index) },
         .float => .{ .float = raw.getClientGlobalFloatValue(index) },
+        else => unreachable,
     };
 }
 

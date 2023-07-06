@@ -70,20 +70,20 @@ pub fn getRecordEffectCount(record_index: u32) u32 {
 pub fn getRecordId(index: u32) [:0]const u8 {
     shared.triggerSafetyCheck(getRecordCount(), index);
 
-    return raw.getRecordId(index);
+    return std.mem.span(raw.getRecordId(index).?);
 }
 pub fn getRecordBaseId(index: u32) [:0]const u8 {
     shared.triggerSafetyCheck(getRecordCount(), index);
 
-    return raw.getRecordBaseId(index);
+    return std.mem.span(raw.getRecordBaseId(index).?);
 }
 
 pub fn getRecordSubtype(index: u32) RecordSubType {
     shared.triggerSafetyCheck(getRecordCount(), index);
 
-    switch (@as(RecordType, raw.getRecordType())) {
-        .enchantment => return .{ .enchantment = @enumFromInt(raw.getRecordSubType(index)) },
-        .spell => return .{ .spell = @enumFromInt(raw.getRecordSubType(index)) },
+    switch (@as(RecordType, @enumFromInt(raw.getRecordType()))) {
+        .enchantment => return .{ .enchantment = @enumFromInt(raw.getRecordSubtype(index)) },
+        .spell => return .{ .spell = @enumFromInt(raw.getRecordSubtype(index)) },
         else => unreachable,
     }
 }

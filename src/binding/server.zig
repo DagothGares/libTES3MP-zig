@@ -10,19 +10,6 @@ pub const LogLevel = enum(u3) {
     fatal,
 };
 
-fn formatIp4(ip_address: std.net.Ip4Address) [16:0]u8 {
-    var buf: [16:0]u8 = undefined;
-    const ip_bytes: *const [4]u8 = @ptrCast(&ip_address.sa.addr);
-    std.fmt.bufPrintZ(&buf, "{d}.{d}.{d}.{d}", .{
-        ip_bytes[0],
-        ip_bytes[1],
-        ip_bytes[2],
-        ip_bytes[3],
-    }) catch unreachable;
-
-    return buf;
-}
-
 pub fn logMessage(level: LogLevel, message: [:0]const u8) void {
     return raw.logMessage(@intFromEnum(level), message);
 }
@@ -37,11 +24,11 @@ pub fn stopServer(code: i32) void {
 pub fn kick(pid: u16) void {
     return raw.kick(pid);
 }
-pub fn banAddress(ip_address: std.net.Ip4Address) void {
-    return raw.banAddress(&formatIp4(ip_address));
+pub fn banAddress(ip_address: [:0]const u8) void {
+    return raw.banAddress(ip_address);
 }
-pub fn unbanAddress(ip_address: std.net.Ip4Address) void {
-    return raw.unbanAddress(&formatIp4(ip_address));
+pub fn unbanAddress(ip_address: [:0]const u8) void {
+    return raw.unbanAddress(ip_address);
 }
 
 /// It is recommended to use std.fs.accessAbsolute and/or related functions instead.
@@ -50,7 +37,7 @@ pub fn doesFilePathExist(file_path: [:0]const u8) bool {
 }
 /// It is recommended to use std.ascii.lowerString instead.
 pub fn getCaseInsensitiveFilename(folder_path: [:0]const u8, filename: [:0]const u8) [:0]const u8 {
-    return raw.getCaseInsensitiveFilename(folder_path, filename);
+    return std.mem.span(raw.getCaseInsensitiveFilename(folder_path, filename).?);
 }
 pub fn getDataPath() [:0]const u8 {
     return std.mem.span(raw.getDataPath().?);
@@ -59,16 +46,15 @@ pub fn getMillisecondsSinceServerStart() c_uint {
     return raw.getMillisecondsSinceServerStart();
 }
 pub fn getServerVersion() [:0]const u8 {
-    return raw.getServerVersion();
+    return std.mem.span(raw.getServerVersion().?);
 }
 pub fn getProtocolVersion() [:0]const u8 {
-    return raw.getProtocolVersion();
+    return std.mem.span(raw.getProtocolVersion().?);
 }
 pub fn getAvgPing(pid: u16) i32 {
     return raw.getAvgPing(pid);
 }
-/// This function can return "UNASSIGNED_SYSTEM_ADDRESS", which is why it does not simply return an
-/// Ip4Address.
+/// This function can return "UNASSIGNED_SYSTEM_ADDRESS".
 pub fn getIP(pid: u16) [:0]const u8 {
     return std.mem.span(raw.getIP(pid).?);
 }

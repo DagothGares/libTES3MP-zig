@@ -9,13 +9,13 @@ pub const QuickKeyType = enum(u2) {
     unassigned,
 };
 
-pub fn messageBox(pid: u16, id: i32, label: [:0]const u8) callconv(.C) void {
+pub fn messageBox(pid: u16, id: i32, label: [:0]const u8) void {
     return raw.messageBox(pid, id, label);
 }
-pub fn customMessageBox(pid: u16, id: i32, label: [:0]const u8, buttons: [:0]const u8) callconv(.C) void {
+pub fn customMessageBox(pid: u16, id: i32, label: [:0]const u8, buttons: [:0]const u8) void {
     return raw.customMessageBox(pid, id, label, buttons);
 }
-pub fn inputDialog(pid: u16, id: i32, label: [:0]const u8, note: [:0]const u8) callconv(.C) void {
+pub fn inputDialog(pid: u16, id: i32, label: [:0]const u8, note: [:0]const u8) void {
     return raw.inputDialog(pid, id, label, note);
 }
 pub fn passwordDialog(pid: u16, id: i32, label: [:0]const u8, note: [:0]const u8) void {

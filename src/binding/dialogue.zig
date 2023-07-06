@@ -14,7 +14,7 @@ pub fn addTopic(pid: u16, topic_id: [:0]const u8) void {
 pub fn getTopicId(pid: u16, index: u32) [:0]const u8 {
     shared.triggerSafetyCheck(getTopicChangesSize(pid), index);
 
-    return std.mem.span(raw.getTopicId(pid).?);
+    return std.mem.span(raw.getTopicId(pid, index).?);
 }
 pub fn sendTopicChanges(pid: u16, send_to_other_players: bool, skip_attached_player: bool) void {
     return raw.sendTopicChanges(pid, skip_attached_player, send_to_other_players);

@@ -243,17 +243,17 @@ pub fn getActorEquipmentItemRefId(index: u32, slot: EquipmentSlot) [:0]const u8 
 pub fn getActorEquipmentItemCount(index: u32, slot: EquipmentSlot) i32 {
     shared.triggerSafetyCheck(getActorListSize(), index);
 
-    return raw.getActorEquipmentItemCount(index, slot);
+    return raw.getActorEquipmentItemCount(index, @intFromEnum(slot));
 }
 pub fn getActorEquipmentItemCharge(index: u32, slot: EquipmentSlot) i32 {
     shared.triggerSafetyCheck(getActorListSize(), index);
 
-    return raw.getActorEquipmentItemCharge(index, slot);
+    return raw.getActorEquipmentItemCharge(index, @intFromEnum(slot));
 }
 pub fn getActorEquipmentItemEnchantmentCharge(index: u32, slot: EquipmentSlot) f64 {
     shared.triggerSafetyCheck(getActorListSize(), index);
 
-    return raw.getActorEquipmentItemEnchantmentCharge(index, slot);
+    return raw.getActorEquipmentItemEnchantmentCharge(index, @intFromEnum(slot));
 }
 
 pub fn doesActorHavePlayerKiller(index: u32) bool {
@@ -371,7 +371,7 @@ pub fn getActorSpellsActiveEffectMagnitude(
         effect_index,
     );
 
-    return raw.getActorSpellsActiveEffectMagntiude(actor_index, spell_index, effect_index);
+    return raw.getActorSpellsActiveEffectMagnitude(actor_index, spell_index, effect_index);
 }
 pub fn getActorSpellsActiveEffectDuration(
     actor_index: u32,
@@ -411,28 +411,28 @@ pub fn doesActorSpellsActiveHavePlayerCaster(actor_index: u32, spell_index: u32)
 pub fn getActorSpellsActiveCasterPid(actor_index: u32, spell_index: u32) u16 {
     shared.triggerSafetyCheck(getActorListSize(), actor_index);
     shared.triggerSafetyCheck(getActorSpellsActiveChangesSize(actor_index), spell_index);
-    std.debug.expect(raw.doesActorSpellsActiveHavePlayerCaster(actor_index, spell_index));
+    std.debug.assert(raw.doesActorSpellsActiveHavePlayerCaster(actor_index, spell_index));
 
     return @intCast(raw.getActorSpellsActiveCasterPid(actor_index, spell_index));
 }
 pub fn getActorSpellsActiveCasterRefId(actor_index: u32, spell_index: u32) [:0]const u8 {
     shared.triggerSafetyCheck(getActorListSize(), actor_index);
     shared.triggerSafetyCheck(getActorSpellsActiveChangesSize(actor_index), spell_index);
-    std.debug.expect(!raw.doesActorSpellsActiveHavePlayerCaster(actor_index, spell_index));
+    std.debug.assert(!raw.doesActorSpellsActiveHavePlayerCaster(actor_index, spell_index));
 
     return std.mem.span(raw.getActorSpellsActiveCasterRefId(actor_index, spell_index).?);
 }
 pub fn getActorSpellsActiveCasterRefNum(actor_index: u32, spell_index: u32) u32 {
     shared.triggerSafetyCheck(getActorListSize(), actor_index);
     shared.triggerSafetyCheck(getActorSpellsActiveChangesSize(actor_index), spell_index);
-    std.debug.expect(!raw.doesActorSpellsActiveHavePlayerCaster(actor_index, spell_index));
+    std.debug.assert(!raw.doesActorSpellsActiveHavePlayerCaster(actor_index, spell_index));
 
     return raw.getActorSpellsActiveCasterRefNum(actor_index, spell_index);
 }
 pub fn getActorSpellsActiveCasterMpNum(actor_index: u32, spell_index: u32) u32 {
     shared.triggerSafetyCheck(getActorListSize(), actor_index);
     shared.triggerSafetyCheck(getActorSpellsActiveChangesSize(actor_index), spell_index);
-    std.debug.expect(!raw.doesActorSpellsActiveHavePlayerCaster(actor_index, spell_index));
+    std.debug.assert(!raw.doesActorSpellsActiveHavePlayerCaster(actor_index, spell_index));
 
     return raw.getActorSpellsActiveCasterMpNum(actor_index, spell_index);
 }
@@ -559,7 +559,7 @@ pub fn addActorSpellActive(
     return raw.addActorSpellActive(spell_id, display_name, stacking_state);
 }
 pub fn addActorSpellActiveEffect(
-    effect_id: u32,
+    effect_id: i32,
     magnitude: f64,
     duration: f64,
     time_left: f64,

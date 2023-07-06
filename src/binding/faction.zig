@@ -34,7 +34,7 @@ pub fn getFactionExpulsionState(pid: u16, index: u32) bool {
 
     return raw.getFactionExpulsionState(pid, index);
 }
-pub fn getFactionReputation(pid: u32, index: u32) i32 {
+pub fn getFactionReputation(pid: u16, index: u32) i32 {
     shared.triggerSafetyCheck(getFactionChangesSize(pid), index);
 
     return raw.getFactionReputation(pid, index);

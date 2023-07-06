@@ -221,81 +221,143 @@ pub fn sendBounty(pid: u16) void {
 
 pub const raw = struct {
     extern "libTES3MP-core" fn libtes3mp_GetAttributeCount() callconv(.C) c_int;
+    pub const getAttributeCount = libtes3mp_GetAttributeCount;
     extern "libTES3MP-core" fn libtes3mp_GetSkillCount() callconv(.C) c_int;
+    pub const getSkillCount = libtes3mp_GetSkillCount;
     extern "libTES3MP-core" fn libtes3mp_GetAttributeId(name: [*:0]const u8) callconv(.C) c_int;
+    pub const getAttributeId = libtes3mp_GetAttributeId;
     extern "libTES3MP-core" fn libtes3mp_GetSkillId(name: [*:0]const u8) callconv(.C) c_int;
+    pub const getSkillId = libtes3mp_GetSkillId;
     extern "libTES3MP-core" fn libtes3mp_GetAttributeName(attribute_id: c_ushort) callconv(.C) ?[*:0]const u8;
+    pub const getAttributeName = libtes3mp_GetAttributeName;
     extern "libTES3MP-core" fn libtes3mp_GetSkillName(skill_id: c_ushort) callconv(.C) ?[*:0]const u8;
+    pub const getSkillName = libtes3mp_GetSkillName;
 
     extern "libTES3MP-core" fn libtes3mp_GetName(pid: c_ushort) callconv(.C) ?[*:0]const u8;
+    pub const getName = libtes3mp_GetName;
     extern "libTES3MP-core" fn libtes3mp_GetRace(pid: c_ushort) callconv(.C) ?[*:0]const u8;
+    pub const getRace = libtes3mp_GetRace;
     extern "libTES3MP-core" fn libtes3mp_GetHead(pid: c_ushort) callconv(.C) ?[*:0]const u8;
+    pub const getHead = libtes3mp_GetHead;
     extern "libTES3MP-core" fn libtes3mp_GetHair(pid: c_ushort) callconv(.C) ?[*:0]const u8;
+    pub const getHair = libtes3mp_GetHair;
     extern "libTES3MP-core" fn libtes3mp_GetIsMale(pid: c_ushort) callconv(.C) c_int;
+    pub const getIsMale = libtes3mp_GetIsMale;
     extern "libTES3MP-core" fn libtes3mp_GetModel(pid: c_ushort) callconv(.C) ?[*:0]const u8;
+    pub const getModel = libtes3mp_GetModel;
     extern "libTES3MP-core" fn libtes3mp_GetBirthsign(pid: c_ushort) callconv(.C) ?[*:0]const u8;
+    pub const getBirthsign = libtes3mp_GetBirthsign;
 
     extern "libTES3MP-core" fn libtes3mp_GetLevel(pid: c_ushort) callconv(.C) c_int;
+    pub const getLevel = libtes3mp_GetLevel;
     extern "libTES3MP-core" fn libtes3mp_GetLevelProgress(pid: c_ushort) callconv(.C) c_int;
+    pub const getLevelProgress = libtes3mp_GetLevelProgress;
 
     extern "libTES3MP-core" fn libtes3mp_GetHealthBase(pid: c_ushort) callconv(.C) f64;
+    pub const getHealthBase = libtes3mp_GetHealthBase;
     extern "libTES3MP-core" fn libtes3mp_GetHealthCurrent(pid: c_ushort) callconv(.C) f64;
+    pub const getHealthCurrent = libtes3mp_GetHealthCurrent;
 
     extern "libTES3MP-core" fn libtes3mp_GetMagickaBase(pid: c_ushort) callconv(.C) f64;
+    pub const getMagickaBase = libtes3mp_GetMagickaBase;
     extern "libTES3MP-core" fn libtes3mp_GetMagickaCurrent(pid: c_ushort) callconv(.C) f64;
+    pub const getMagickaCurrent = libtes3mp_GetMagickaCurrent;
 
     extern "libTES3MP-core" fn libtes3mp_GetFatigueBase(pid: c_ushort) callconv(.C) f64;
+    pub const getFatigueBase = libtes3mp_GetFatigueBase;
     extern "libTES3MP-core" fn libtes3mp_GetFatigueCurrent(pid: c_ushort) callconv(.C) f64;
+    pub const getFatigueCurrent = libtes3mp_GetFatigueCurrent;
 
     extern "libTES3MP-core" fn libtes3mp_GetAttributeBase(pid: c_ushort, attribute_id: c_ushort) callconv(.C) c_int;
+    pub const getAttributeBase = libtes3mp_GetAttributeBase;
     extern "libTES3MP-core" fn libtes3mp_GetAttributeModifier(pid: c_ushort, attribute_id: c_ushort) callconv(.C) c_int;
+    pub const getAttributeModifier = libtes3mp_GetAttributeModifier;
     extern "libTES3MP-core" fn libtes3mp_GetAttributeDamage(pid: c_ushort, attribute_id: c_ushort) callconv(.C) f64;
+    pub const getAttributeDamage = libtes3mp_GetAttributeDamage;
 
     extern "libTES3MP-core" fn libtes3mp_GetSkillBase(pid: c_ushort, skill_id: c_ushort) callconv(.C) c_int;
+    pub const getSkillBase = libtes3mp_GetSkillBase;
     extern "libTES3MP-core" fn libtes3mp_GetSkillModifier(pid: c_ushort, skill_id: c_ushort) callconv(.C) c_int;
+    pub const getSkillModifier = libtes3mp_GetSkillModifier;
     extern "libTES3MP-core" fn libtes3mp_GetSkillDamage(pid: c_ushort, skill_id: c_ushort) callconv(.C) f64;
+    pub const getSkillDamage = libtes3mp_GetSkillDamage;
     extern "libTES3MP-core" fn libtes3mp_GetSkillProgress(pid: c_ushort, skill_id: c_ushort) callconv(.C) f64;
+    pub const getSkillProgress = libtes3mp_GetSkillProgress;
     extern "libTES3MP-core" fn libtes3mp_GetSkillIncrease(pid: c_ushort, attribute_id: c_uint) callconv(.C) c_int;
+    pub const getSkillIncrease = libtes3mp_GetSkillIncrease;
 
     extern "libTES3MP-core" fn libtes3mp_GetBounty(pid: c_ushort) callconv(.C) c_int;
+    pub const getBounty = libtes3mp_GetBounty;
 
     extern "libTES3MP-core" fn libtes3mp_SetName(pid: c_ushort, name: [*:0]const u8) callconv(.C) void;
+    pub const setName = libtes3mp_SetName;
     extern "libTES3MP-core" fn libtes3mp_SetRace(pid: c_ushort, race: [*:0]const u8) callconv(.C) void;
+    pub const setRace = libtes3mp_SetRace;
     extern "libTES3MP-core" fn libtes3mp_SetHead(pid: c_ushort, head: [*:0]const u8) callconv(.C) void;
+    pub const setHead = libtes3mp_SetHead;
     extern "libTES3MP-core" fn libtes3mp_SetHair(pid: c_ushort, hairstyle: [*:0]const u8) callconv(.C) void;
+    pub const setHair = libtes3mp_SetHair;
     extern "libTES3MP-core" fn libtes3mp_SetIsMale(pid: c_ushort, state: c_int) callconv(.C) void;
+    pub const setIsMale = libtes3mp_SetIsMale;
     extern "libTES3MP-core" fn libtes3mp_SetModel(pid: c_ushort, model: [*:0]const u8) callconv(.C) void;
+    pub const setModel = libtes3mp_SetModel;
     extern "libTES3MP-core" fn libtes3mp_SetBirthsign(pid: c_ushort, name: [*:0]const u8) callconv(.C) void;
+    pub const setBirthsign = libtes3mp_SetBirthsign;
     extern "libTES3MP-core" fn libtes3mp_SetResetStats(pid: c_ushort, reset_stats: bool) callconv(.C) void;
+    pub const setResetStats = libtes3mp_SetResetStats;
 
     extern "libTES3MP-core" fn libtes3mp_SetLevel(pid: c_ushort, value: c_int) callconv(.C) void;
+    pub const setLevel = libtes3mp_SetLevel;
     extern "libTES3MP-core" fn libtes3mp_SetLevelProgress(pid: c_ushort, value: c_int) callconv(.C) void;
+    pub const setLevelProgress = libtes3mp_SetLevelProgress;
 
     extern "libTES3MP-core" fn libtes3mp_SetHealthBase(pid: c_ushort, value: f64) callconv(.C) void;
+    pub const setHealthBase = libtes3mp_SetHealthBase;
     extern "libTES3MP-core" fn libtes3mp_SetHealthCurrent(pid: c_ushort, value: f64) callconv(.C) void;
+    pub const setHealthCurrent = libtes3mp_SetHealthCurrent;
     extern "libTES3MP-core" fn libtes3mp_SetMagickaBase(pid: c_ushort, value: f64) callconv(.C) void;
+    pub const setMagickaBase = libtes3mp_SetMagickaBase;
     extern "libTES3MP-core" fn libtes3mp_SetMagickaCurrent(pid: c_ushort, value: f64) callconv(.C) void;
+    pub const setMagickaCurrent = libtes3mp_SetMagickaCurrent;
     extern "libTES3MP-core" fn libtes3mp_SetFatigueBase(pid: c_ushort, value: f64) callconv(.C) void;
+    pub const setFatigueBase = libtes3mp_SetFatigueBase;
     extern "libTES3MP-core" fn libtes3mp_SetFatigueCurrent(pid: c_ushort, value: f64) callconv(.C) void;
+    pub const setFatigueCurrent = libtes3mp_SetFatigueCurrent;
 
     extern "libTES3MP-core" fn libtes3mp_SetAttributeBase(pid: c_ushort, attribute_id: c_ushort, value: c_int) callconv(.C) void;
+    pub const setAttributeBase = libtes3mp_SetAttributeBase;
     extern "libTES3MP-core" fn libtes3mp_ClearAttributeModifier(pid: c_ushort, attribute_id: c_ushort) callconv(.C) void;
+    pub const clearAttributeModifier = libtes3mp_ClearAttributeModifier;
     extern "libTES3MP-core" fn libtes3mp_SetAttributeDamage(pid: c_ushort, attribute_id: c_ushort, value: f64) callconv(.C) void;
+    pub const setAttributeDamage = libtes3mp_SetAttributeDamage;
 
     extern "libTES3MP-core" fn libtes3mp_SetSkillBase(pid: c_ushort, skill_id: c_ushort, value: c_int) callconv(.C) void;
+    pub const setSkillBase = libtes3mp_SetSkillBase;
     extern "libTES3MP-core" fn libtes3mp_ClearSkillModifier(pid: c_ushort, skill_id: c_ushort) callconv(.C) void;
+    pub const clearSkillModifier = libtes3mp_ClearSkillModifier;
     extern "libTES3MP-core" fn libtes3mp_SetSkillDamage(pid: c_ushort, skill_id: c_ushort, value: f64) callconv(.C) void;
+    pub const setSkillDamage = libtes3mp_SetSkillDamage;
     extern "libTES3MP-core" fn libtes3mp_SetSkillProgress(pid: c_ushort, skill_id: c_ushort, value: f64) callconv(.C) void;
+    pub const setSkillProgress = libtes3mp_SetSkillProgress;
     extern "libTES3MP-core" fn libtes3mp_SetSkillIncrease(pid: c_ushort, attribute_id: c_uint, value: c_int) callconv(.C) void;
+    pub const setSkillIncrease = libtes3mp_SetSkillIncrease;
 
     extern "libTES3MP-core" fn libtes3mp_SetBounty(pid: c_ushort, value: c_int) callconv(.C) void;
+    pub const setBounty = libtes3mp_SetBounty;
     extern "libTES3MP-core" fn libtes3mp_SetCharGenStage(pid: c_ushort, current_stage: c_int, end_stage: c_int) callconv(.C) void;
+    pub const setCharGenStage = libtes3mp_SetCharGenStage;
 
     extern "libTES3MP-core" fn libtes3mp_SendBaseInfo(pid: c_ushort) callconv(.C) void;
+    pub const sendBaseInfo = libtes3mp_SendBaseInfo;
 
     extern "libTES3MP-core" fn libtes3mp_SendStatsDynamic(pid: c_ushort) callconv(.C) void;
+    pub const sendStatsDynamic = libtes3mp_SendStatsDynamic;
     extern "libTES3MP-core" fn libtes3mp_SendAttributes(pid: c_ushort) callconv(.C) void;
+    pub const sendAttributes = libtes3mp_SendAttributes;
     extern "libTES3MP-core" fn libtes3mp_SendSkills(pid: c_ushort) callconv(.C) void;
+    pub const sendSkills = libtes3mp_SendSkills;
     extern "libTES3MP-core" fn libtes3mp_SendLevel(pid: c_ushort) callconv(.C) void;
+    pub const sendLevel = libtes3mp_SendLevel;
     extern "libTES3MP-core" fn libtes3mp_SendBounty(pid: c_ushort) callconv(.C) void;
+    pub const sendBounty = libtes3mp_SendBounty;
 };
